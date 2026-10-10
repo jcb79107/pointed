@@ -14,7 +14,7 @@ export default async function PrepareSessionPage({
 }) {
   const user = await getCurrentUser();
   const { id } = await params;
-  if (!user) redirect(`/api/auth/linear/start?returnTo=/app/sessions/${id}/prepare`);
+  if (!user) redirect(`/app?returnTo=/app/sessions/${id}/prepare`);
 
   let snapshot;
   let settings;

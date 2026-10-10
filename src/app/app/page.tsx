@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Brand } from "@/components/Brand";
 import { DashboardClient } from "@/components/DashboardClient";
 import { getCurrentUser } from "@/lib/auth";
+import { safeReturnTo } from "@/lib/http";
 import { isAppConfigured } from "@/lib/env";
 import { listLinearTeams } from "@/lib/linear";
 import { getUserSettings } from "@/lib/settings";
@@ -20,11 +21,12 @@ const authErrors: Record<string, string> = {
 export default async function AppHome({
   searchParams,
 }: {
-  searchParams: Promise<{ authError?: string }>;
+  searchParams: Promise<{ authError?: string; returnTo?: string }>;
 }) {
   if (!isAppConfigured()) redirect("/setup");
   const user = await getCurrentUser();
-  const { authError } = await searchParams;
+  const { authError, returnTo } = await searchParams;
+  const destination = safeReturnTo(returnTo ?? null);
 
   if (!user) {
     return (
@@ -42,10 +44,11 @@ export default async function AppHome({
           )}
           <a
             className="button button-primary button-large"
-            href="/api/auth/linear/start?returnTo=/app"
+            href={`/api/auth/linear/start?returnTo=${encodeURIComponent(destination)}`}
           >
             <LogIn size={18} /> Continue with Linear <ArrowRight size={18} />
           </a>
+          <p><Link href="/privacy">Privacy and how we use your data</Link></p>
           <small>
             Read access is used to show tickets. Session facilitators also grant
             write access so the final estimate can be applied.
@@ -66,6 +69,8 @@ export default async function AppHome({
       </main>
     );
   }
+
+  if (destination !== "/app") redirect(destination);
 
   const [teams, sessions, settings] = await Promise.all([
     listLinearTeams(user.id),

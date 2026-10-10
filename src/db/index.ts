@@ -1,5 +1,8 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+import { cookies } from "next/headers";
+import { scopedPool } from "./scoped-pool";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
@@ -27,4 +30,7 @@ function getPool() {
   return globalForDb.linearPokerPool;
 }
 
-export const db = drizzle({ client: getPool(), schema });
+export const db = drizzle({ client: scopedPool(getPool(), async () => {
+  const token = (await cookies()).get("lpp_session")?.value;
+  return token ? createHash("sha256").update(token).digest("hex") : "";
+}), schema });

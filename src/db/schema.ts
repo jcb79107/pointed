@@ -59,7 +59,7 @@ export const users = pgTable(
       table.linearUserId,
     ),
   ],
-);
+).enableRLS();
 
 export const linearConnections = pgTable("linear_connections", {
   userId: uuid("user_id")
@@ -72,7 +72,7 @@ export const linearConnections = pgTable("linear_connections", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}).enableRLS();
 
 export const userSettings = pgTable("user_settings", {
   userId: uuid("user_id")
@@ -105,7 +105,7 @@ export const userSettings = pgTable("user_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}).enableRLS();
 
 export const authSessions = pgTable(
   "auth_sessions",
@@ -121,14 +121,14 @@ export const authSessions = pgTable(
       .notNull(),
   },
   (table) => [uniqueIndex("auth_sessions_token_hash_idx").on(table.tokenHash)],
-);
+).enableRLS();
 
 export const teamDefaults = pgTable("team_defaults", {
   organizationId: text("organization_id").notNull(),
   teamId: text("team_id").notNull(),
   settings: jsonb("settings").$type<import("@/lib/domain").TeamDefaults>().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (table) => [primaryKey({ columns: [table.organizationId, table.teamId] })]);
+}, (table) => [primaryKey({ columns: [table.organizationId, table.teamId] })]).enableRLS();
 
 export const pokerSessions = pgTable(
   "poker_sessions",
@@ -175,7 +175,7 @@ export const pokerSessions = pgTable(
     uniqueIndex("poker_sessions_code_idx").on(table.code),
     index("poker_sessions_org_idx").on(table.organizationId),
   ],
-);
+).enableRLS();
 
 export const queueItems = pgTable(
   "queue_items",
@@ -245,7 +245,7 @@ export const queueItems = pgTable(
       table.position,
     ),
   ],
-);
+).enableRLS();
 
 export const participants = pgTable(
   "participants",
@@ -266,7 +266,7 @@ export const participants = pgTable(
       .notNull(),
   },
   (table) => [primaryKey({ columns: [table.sessionId, table.userId] })],
-);
+).enableRLS();
 
 export const rounds = pgTable(
   "rounds",
@@ -292,7 +292,7 @@ export const rounds = pgTable(
     uniqueIndex("round_queue_number_idx").on(table.queueItemId, table.number),
     index("round_session_idx").on(table.sessionId),
   ],
-);
+).enableRLS();
 
 export const roundVoters = pgTable(
   "round_voters",
@@ -305,7 +305,7 @@ export const roundVoters = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [primaryKey({ columns: [table.roundId, table.userId] })],
-);
+).enableRLS();
 
 export const votes = pgTable(
   "votes",
@@ -322,7 +322,7 @@ export const votes = pgTable(
       .notNull(),
   },
   (table) => [primaryKey({ columns: [table.roundId, table.userId] })],
-);
+).enableRLS();
 
 export const roundSignals = pgTable(
   "round_signals",
@@ -339,7 +339,7 @@ export const roundSignals = pgTable(
       .notNull(),
   },
   (table) => [primaryKey({ columns: [table.roundId, table.userId] })],
-);
+).enableRLS();
 
 export const auditEvents = pgTable(
   "audit_events",
@@ -361,7 +361,7 @@ export const auditEvents = pgTable(
       .notNull(),
   },
   (table) => [index("audit_session_idx").on(table.sessionId)],
-);
+).enableRLS();
 
 // One private Slack destination per Linear user/workspace identity.
 export const slackConnections = pgTable("slack_connections", {
@@ -373,4 +373,4 @@ export const slackConnections = pgTable("slack_connections", {
   source: text("source").notNull(),
   lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}).enableRLS();

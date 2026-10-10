@@ -14,7 +14,7 @@ export default async function LiveSessionPage({
   const { id } = await params;
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`/api/auth/linear/start?returnTo=/sessions/${id}`);
+    redirect(`/app?returnTo=/sessions/${id}`);
   }
   let snapshot;
   try {

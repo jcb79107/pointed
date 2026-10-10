@@ -5,20 +5,10 @@ import { cookies } from "next/headers";
 
 import { db } from "@/db";
 import { authSessions, users } from "@/db/schema";
-import { hashToken, randomToken } from "@/lib/crypto";
+import { hashToken } from "@/lib/crypto";
 
 const SESSION_COOKIE = "lpp_session";
-const SESSION_LENGTH_MS = 14 * 24 * 60 * 60 * 1000;
-
-export async function createUserSession(userId: string): Promise<void> {
-  const token = randomToken();
-  const expiresAt = new Date(Date.now() + SESSION_LENGTH_MS);
-  await db.insert(authSessions).values({
-    tokenHash: hashToken(token),
-    userId,
-    expiresAt,
-  });
-
+export async function setUserSessionCookie(token: string, expiresAt: Date): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,

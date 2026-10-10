@@ -6,6 +6,7 @@ import { CopySetupPrompt } from "@/components/CopySetupPrompt";
 
 const variables = [
   "DATABASE_URL",
+  "AUTH_DATABASE_URL",
   "LINEAR_CLIENT_ID",
   "TOKEN_ENCRYPTION_KEY",
 ];
@@ -13,7 +14,7 @@ const variables = [
 export default function SetupPage() {
   const localAppUrl = "http://localhost:3000";
   const callbackUrl = `${localAppUrl}/api/auth/linear/callback`;
-  const repositoryUrl = "https://github.com/jcb79107/linear-pointing";
+  const repositoryUrl = "https://github.com/jcb79107/pointed";
   const linearSetupUrl = new URL(
     "https://linear.app/settings/api/applications/new",
   );
@@ -33,8 +34,8 @@ Please:
 1. Clone or open the repository and read README.md and .env.example.
 2. Install its dependencies.
 3. Help me create a public Linear OAuth application. Use ${callbackUrl} as its callback URL.
-4. Create or connect a Postgres database, then configure .env.local with APP_URL, LINEAR_CLIENT_ID, LINEAR_REDIRECT_URI, TOKEN_ENCRYPTION_KEY, and DATABASE_URL. Pusher is optional.
-5. Run the database migration and start the app locally.
+4. Follow docs/launch/DATABASE-ISOLATION.md to migrate with DATABASE_ADMIN_URL and provision the restricted DATABASE_URL and AUTH_DATABASE_URL roles. Keep the admin connection local.
+5. Configure APP_URL, LINEAR_CLIENT_ID, LINEAR_REDIRECT_URI, and TOKEN_ENCRYPTION_KEY in .env.local, then start the app locally. Pusher is optional.
 6. Verify that the homepage loads and that the Connect Linear flow reaches Linear OAuth.
 
 Never print or commit secrets. When I must authorize an account, click a web form, or paste a secret, pause and tell me exactly what to do in plain language. Otherwise, handle the setup yourself.`;
@@ -126,7 +127,7 @@ Never print or commit secrets. When I must authorize an account, click a web for
               <span>5</span>
               <div>
                 <b>Create the tables and start the app</b>
-                <div className="command"><code>npm run db:migrate</code></div>
+                <p>Follow the <a href={`${repositoryUrl}/blob/main/docs/launch/DATABASE-ISOLATION.md`}>database isolation setup</a> to migrate and provision the two restricted connections. Keep the admin connection out of your deployment.</p>
                 <div className="command"><code>npm run dev</code></div>
                 <p>Open <code>http://localhost:3000</code>, then connect Linear.</p>
               </div>

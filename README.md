@@ -77,14 +77,13 @@ pending release and real Linear integration checks.
 
    `http://localhost:3000/api/auth/linear/callback`
 
-2. Create a Neon database and use its pooled connection string.
+2. Create a Neon database. Follow [database isolation setup](docs/launch/DATABASE-ISOLATION.md) to migrate as the owner and provision the two restricted app connections.
 3. Copy `.env.example` to `.env.local` and fill the required values. Generate the token
    key with `openssl rand -base64 32`.
 4. Apply migrations and start the app:
 
 ```bash
 npm install
-npm run db:migrate
 npm run dev
 ```
 
@@ -126,14 +125,14 @@ it does not verify Neon transport, multi-connection locking, or live Slack deliv
 ## Deployment
 
 Import the repository into Vercel, provision Neon, and add the variables from
-`.env.example` to Production and Preview. Set:
+`.env.example` to Production and Preview, except `DATABASE_ADMIN_URL`, which stays in your operator environment. Set:
 
 - `APP_URL` to the production origin
 - `LINEAR_REDIRECT_URI` to
   `https://<production-origin>/api/auth/linear/callback`
 
-Then run `npm run db:migrate` against the production Neon connection before
-first use. Never expose `PUSHER_SECRET`, `TOKEN_ENCRYPTION_KEY`, or
+Apply migrations with the owner connection and provision restricted runtime/login roles before
+first use, following the [database rollout guide](docs/launch/DATABASE-ISOLATION.md). Never expose `PUSHER_SECRET`, `TOKEN_ENCRYPTION_KEY`, or
 `DATABASE_URL` as `NEXT_PUBLIC_*`.
 
 ## License
@@ -175,5 +174,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [release
 ## Error reporting and feedback
 
 The hosted app uses Sentry for privacy-filtered errors and optional user feedback.
-Feedback submissions include a recent replay and support optional screenshot attachments. Replay stays buffered locally until submission; canceling sends nothing. Self-hosted installs can opt in using the
+Feedback supports optional screenshot attachments. Recording starts only after the user chooses to record, stays local, and is uploaded only when they submit with “Attach my recording” selected. Canceling discards it. Self-hosted installs can opt in using the
 variables in `.env.example`; see [Sentry setup and data boundaries](docs/launch/SENTRY.md).

@@ -1,9 +1,9 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { MessageSquare } from "lucide-react";
 import Link from "next/link";
-import { sendPointedFeedback } from "@/lib/feedback";
+import { discardFeedbackRecording, startFeedbackRecording, sendPointedFeedback } from "@/lib/feedback";
 
 export function FeedbackButton({ compact = false }: { compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -15,6 +15,24 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [screenshot, setScreenshot] = useState<File>();
+  const [recording, setRecording] = useState(false);
+  const [includeReplay, setIncludeReplay] = useState(false);
+  useEffect(() => () => { void discardFeedbackRecording(); }, []);
+  async function cancel() {
+    await discardFeedbackRecording();
+    setRecording(false);
+    setIncludeReplay(false);
+    dialog.current?.close();
+  }
+  function record() {
+    try {
+      startFeedbackRecording();
+      setRecording(true);
+      setIncludeReplay(true);
+      setError("");
+      dialog.current?.close();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Recording is unavailable."); }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,22 +43,23 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
     setBusy(true);
     setError("");
     try {
-      await sendPointedFeedback(message, String(data.get("email") ?? "").trim(), screenshot);
+      await sendPointedFeedback(message, String(data.get("email") ?? "").trim(), screenshot, includeReplay);
       dialog.current?.close();
       form.current?.reset();
       setScreenshot(undefined);
       setSent(true);
     } catch {
       setError("Couldn’t send your feedback. Your message is still here—please try again or use Help.");
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setRecording(false); setIncludeReplay(false); }
   }
 
   return <span className="feedback-control">
     <button ref={trigger} type="button" className={compact ? "header-icon-link" : "button button-secondary"} aria-label="Send feedback" title="Send feedback" onClick={() => { setSent(false); dialog.current?.showModal(); }}>
       <MessageSquare size={16} aria-hidden="true" />{!compact && "Send feedback"}
     </button>
+    {recording && <span className="feedback-recording" role="status">Recording locally <button type="button" onClick={() => void cancel()}>Discard recording</button></span>}
     {sent && <span className="feedback-fallback" role="status">Thanks — your feedback was sent.</span>}
-    <dialog onClose={() => trigger.current?.focus()} ref={dialog} className="feedback-dialog" aria-labelledby={titleId} aria-describedby={noticeId} onCancel={(event) => { if (busy) event.preventDefault(); }} data-sentry-block>
+    <dialog onClose={() => trigger.current?.focus()} ref={dialog} className="feedback-dialog" aria-labelledby={titleId} aria-describedby={noticeId} onCancel={(event) => { event.preventDefault(); if (!busy) void cancel(); }} data-sentry-block>
       <form ref={form} onSubmit={submit}>
         <h2 id={titleId}>Send feedback</h2>
         <label>What happened, or what would you change?<textarea name="message" required maxLength={5000} rows={5} /></label>
@@ -53,9 +72,11 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
           setError(""); setScreenshot(file);
         }} /></label>
         {screenshot && <button className="button button-secondary" type="button" onClick={() => { setScreenshot(undefined); const input = form.current?.elements.namedItem("screenshot") as HTMLInputElement; if (input) input.value = ""; }}>Remove screenshot</button>}
-        <p id={noticeId}>Sending shares your message, attached screenshot, and up to the last minute of activity in Pointed with its maintainer through Sentry. The replay can include visible tickets. Typed input is masked. <Link href="/privacy" target="_blank">Privacy</Link></p>
+        <p id={noticeId}>Sending shares your message, optional email, and any screenshot you attach with the maintainer through Sentry. Review screenshots for private information. <Link href="/privacy" target="_blank">Privacy</Link></p>
+        <p>Replay is off by default. You can start a recording, reproduce the problem, then reopen feedback to attach up to the last minute. Text is masked; forms and sensitive content are blocked. Nothing is uploaded until you send it.</p>
+        {recording ? <label className="feedback-replay-choice"><input type="checkbox" checked={includeReplay} onChange={event => setIncludeReplay(event.target.checked)} />Attach my recording</label> : <button type="button" className="button button-secondary" onClick={record}>Start recording to reproduce a problem</button>}
         {error && <p role="alert">{error} <Link href="/support" target="_blank">Help</Link></p>}
-        <div className="feedback-actions"><button type="button" className="button button-secondary" disabled={busy} onClick={() => dialog.current?.close()}>Cancel</button><button type="submit" className="button button-primary" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</button></div>
+        <div className="feedback-actions"><button type="button" className="button button-secondary" disabled={busy} onClick={() => void cancel()}>Cancel</button><button type="submit" className="button button-primary" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</button></div>
       </form>
     </dialog>
   </span>;

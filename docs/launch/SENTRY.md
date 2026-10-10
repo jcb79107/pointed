@@ -22,9 +22,9 @@ reference. Never add ticket content or vote values to telemetry.
 SDK data collection for users, cookies, headers, bodies, query parameters,
 GraphQL content, database values, queue arguments, source context and local
 variables is disabled. Logs and metrics are discarded; tracing and browser
-session tracking are disabled. Replay keeps a rolling local buffer. Submitting feedback uploads up to the last minute, then returns to local buffering. Automatic errors do not upload replays. Replay shows visible text and interactions, masks typed input, blocks media, and excludes console/network details.
+session tracking are disabled. Both replay sample rates are zero. Replay starts buffering only after the user selects “Start recording to reproduce a problem.” Cancel/discard stops it without uploading. Submitting ends recording and uploads it only when “Attach my recording” is selected. No automatic restart occurs. Text is masked; forms, input controls, media, and sensitive regions are blocked. Console/network details are excluded.
 
-Feedback includes the message, optional reply email, optional PNG/JPG/WebP screenshot (up to 5 MB), and linked replay. The form explains these before submission. Screenshots and replay can contain visible ticket content; raw page URLs are excluded from feedback metadata. No account autofill is used.
+Feedback includes the message, optional reply email, optional PNG/JPG/WebP screenshot (up to 5 MB), and an explicitly selected replay. The form explains these before submission. User-attached screenshots can contain private content and should be reviewed; raw page URLs are excluded from feedback metadata. No account autofill is used.
 
 Sentry project settings disable IP storage and apply an advanced `[Remove] [Anything] from [$user.geo.**]` rule to remove inferred geography.
 Feedback is stored separately from Pointed's account records. Account deletion
