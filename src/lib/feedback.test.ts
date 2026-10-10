@@ -8,29 +8,41 @@ vi.mock("@sentry/nextjs", () => ({
   getReplay: () => ({ getReplayId: () => "a".repeat(32), flush: sdk.flush, stop: sdk.stop, startBuffering: sdk.startBuffering }),
   sendFeedback: sdk.sendFeedback,
 }));
-import { sendPointedFeedback } from "./feedback";
+import { sendPointedFeedback, startFeedbackRecording, discardFeedbackRecording } from "./feedback";
 
 describe("feedback submission", () => {
   beforeEach(() => { vi.clearAllMocks(); sdk.flush.mockResolvedValue(undefined); sdk.stop.mockResolvedValue(undefined); sdk.sendFeedback.mockResolvedValue("event"); });
-  it("uploads the buffer only on submission, links it, and stops ongoing uploads", async () => {
+  it("starts only on request and discards without uploading", async () => {
+    startFeedbackRecording();
+    expect(sdk.startBuffering).toHaveBeenCalledOnce();
+    await discardFeedbackRecording();
+    expect(sdk.stop).toHaveBeenCalledWith({flush:false});
+    expect(sdk.flush).not.toHaveBeenCalled();
+  });
+  it("uploads an explicitly attached buffer, links it, and stops recording", async () => {
     expect(sdk.flush).not.toHaveBeenCalled();
     sdk.sendFeedback.mockImplementationOnce(async () => {
       const event = { contexts: { feedback: {} } };
       sdk.listener?.(event);
       expect(event.contexts.feedback).toEqual({ replay_id: "a".repeat(32) });
     });
-    await sendPointedFeedback("The queue jumps", "");
+    await sendPointedFeedback("The queue jumps", "", undefined, true);
     expect(sdk.flush).toHaveBeenCalledWith({ continueRecording: false });
     expect(sdk.sendFeedback).toHaveBeenCalledWith({ message: "The queue jumps", email: undefined }, { includeReplay: false, attachments: undefined });
     expect(sdk.stop).toHaveBeenCalledWith({ flush: false });
-    expect(sdk.startBuffering).toHaveBeenCalledOnce();
+    expect(sdk.startBuffering).not.toHaveBeenCalled();
     expect(sdk.off).toHaveBeenCalledOnce();
   });
-  it("returns to local buffering after a failed upload", async () => {
+  it("sends text-only feedback without uploading any replay", async () => {
+    await sendPointedFeedback("Text only", "");
+    expect(sdk.flush).not.toHaveBeenCalled();
+    expect(sdk.startBuffering).not.toHaveBeenCalled();
+  });
+  it("stops recording after a failed upload", async () => {
     sdk.sendFeedback.mockRejectedValueOnce(new Error("offline"));
     await expect(sendPointedFeedback("Retry this", "")).rejects.toThrow("offline");
     expect(sdk.stop).toHaveBeenCalledWith({ flush: false });
-    expect(sdk.startBuffering).toHaveBeenCalledOnce();
+    expect(sdk.startBuffering).not.toHaveBeenCalled();
     expect(sdk.off).toHaveBeenCalledOnce();
   });
 });

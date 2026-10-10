@@ -12,15 +12,16 @@ Sentry.init({
   maxBreadcrumbs: 0,
   tracesSampleRate: 0,
   replaysSessionSampleRate: 0,
-  // Start/restart a local buffer automatically; beforeErrorSampling blocks error-triggered uploads.
-  replaysOnErrorSampleRate: 1,
+  // Recording starts only after an explicit user action in feedback.
+  replaysOnErrorSampleRate: 0,
   beforeSendLog: () => null,
   beforeSendMetric: () => null,
   beforeSend: sanitizeSentryEvent,
   integrations: (defaults) => [
     ...defaults.filter((integration) => !["Breadcrumbs", "BrowserSession", "HttpContext"].includes(integration.name)),
     Sentry.replayIntegration({
-      maskAllText: false,
+      maskAllText: true,
+      block: ["form", "input", "textarea", "select", "[contenteditable]", "[data-sensitive]", "[data-sentry-block]", ".issue-description", ".issue-tags", ".room-title", ".participant-list"],
       maskAllInputs: true,
       blockAllMedia: true,
       stickySession: false,

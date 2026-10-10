@@ -175,19 +175,10 @@ export async function listPokerSessions(
 }
 
 export async function getPublicSessionPreview(code: string) {
-  const [session] = await db
-    .select({
-      title: pokerSessions.title,
-      teamName: pokerSessions.teamName,
-      status: pokerSessions.status,
-      issueCount: sql<number>`count(distinct ${queueItems.id})::int`,
-    })
-    .from(pokerSessions)
-    .leftJoin(queueItems, eq(queueItems.sessionId, pokerSessions.id))
-    .where(eq(pokerSessions.code, code))
-    .groupBy(pokerSessions.id)
-    .limit(1);
-  return session ?? null;
+  const result = await db.execute<{ title: string; teamName: string; status: "draft" | "live" | "ended"; issueCount: number }>(
+    sql`select * from pointed_private.invite_preview(${code})`,
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function addQueueItems(input: {

@@ -24,10 +24,13 @@ jobs:
       - run: npm test
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run build -- --webpack
+        env:
+          NEXT_PUBLIC_SENTRY_DSN: https://public@sentry.invalid/1
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:ui
         env:
           UI_TEST_PRODUCTION: '1'
+          FEEDBACK_RECORDING_TEST: '1'
       - uses: actions/upload-artifact@v7
         if: failure()
         with:

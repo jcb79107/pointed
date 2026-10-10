@@ -992,7 +992,7 @@ export function LiveRoom({
       event.metaKey ||
       event.ctrlKey ||
       event.altKey ||
-      document.querySelector('[role="dialog"][aria-modal="true"]') ||
+      document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]') ||
       target?.closest("input, textarea, select, [contenteditable='true']")
     ) {
       return;

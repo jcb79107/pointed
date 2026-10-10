@@ -1,4 +1,5 @@
 import { ArrowRight, LogIn } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Brand } from "@/components/Brand";
@@ -50,6 +51,7 @@ export default async function JoinPage({
           >
             <LogIn size={18} /> Sign in with Linear <ArrowRight size={18} />
           </a>
+          <p><Link href="/privacy">Privacy and how we use your data</Link></p>
           <small>Votes stay private until reveal. Your facilitator saves the agreed estimate to Linear.</small>
         </section>
       </main>

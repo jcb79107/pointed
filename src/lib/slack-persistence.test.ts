@@ -65,7 +65,7 @@ describe("disposable PostgreSQL migration and Slack persistence", () => {
   it("upgrades all migrations, preserves existing settings/decks, and does not replay applied migrations", async () => {
     await migrate(database(), { migrationsFolder: "drizzle" });
     const journal = await client.query<{ count: number }>('select count(*)::int as count from drizzle.__drizzle_migrations');
-    expect(journal.rows[0].count).toBe(8);
+    expect(journal.rows[0].count).toBe(9);
     const [settings] = await database().select().from(schema.userSettings).where(eq(schema.userSettings.userId, legacyUser));
     expect(settings).toMatchObject({ cycleScope: "upcoming", pointingPreset: "custom", customPointValues: [1, 8], defaultSort: "custom" });
     const [session] = await database().select().from(schema.pokerSessions).where(eq(schema.pokerSessions.id, legacySession));

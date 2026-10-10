@@ -3,11 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   cookies: { get: vi.fn(), delete: vi.fn() },
   getServerEnv: vi.fn(),
+  completeLogin: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/headers", () => ({ cookies: async () => mocks.cookies }));
 vi.mock("@/lib/env", () => ({ getServerEnv: mocks.getServerEnv }));
-vi.mock("@/lib/auth", () => ({ createUserSession: vi.fn() }));
+vi.mock("@/lib/complete-login", () => ({ completeLogin: mocks.completeLogin }));
+vi.mock("@linear/sdk", () => ({ LinearClient: class { viewer = Promise.resolve({id:"verified-user", email:"person@example.test", displayName:"Person", avatarUrl:null, organization:Promise.resolve({id:"verified-org"})}); } }));
 vi.mock("@/db", () => ({ db: {} }));
 import { GET } from "./route";
 
@@ -50,4 +52,12 @@ describe("Linear OAuth recovery", () => {
     expect(response.headers.get("location")).toBe("https://pointed.test/app?authError=token_exchange_failed");
     expect(fetch).not.toHaveBeenCalled();
   });
+});
+
+it("creates a session only after a successful validated provider exchange", async () => {
+  vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ access_token: "provider-access", refresh_token: "provider-refresh", expires_in: 3600, scope: "read,write" }), { status: 200 }));
+  const response = await callback("state=valid&code=provider-code");
+  expect(mocks.completeLogin).toHaveBeenCalledWith(expect.objectContaining({linearUserId:"verified-user",organizationId:"verified-org",accessToken:"provider-access",refreshToken:"provider-refresh",scopes:["read","write"]}));
+  expect(response.headers.get("location")).toBe("https://pointed.test/s/INVITE123");
+  expect(mocks.cookies.delete).toHaveBeenCalledWith("linear_oauth_verifier");
 });

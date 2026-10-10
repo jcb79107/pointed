@@ -1,12 +1,8 @@
 import { LinearClient } from "@linear/sdk";
-import { sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { db } from "@/db";
-import { linearConnections, users } from "@/db/schema";
-import { createUserSession } from "@/lib/auth";
-import { encryptSecret } from "@/lib/crypto";
+import { completeLogin } from "@/lib/complete-login";
 import { getServerEnv } from "@/lib/env";
 import { safeReturnTo } from "@/lib/http";
 import { validOAuthState } from "@/lib/oauth";
@@ -86,50 +82,14 @@ export async function GET(request: Request) {
   const viewer = await client.viewer;
   const organization = await viewer.organization;
 
-  const [user] = await db
-    .insert(users)
-    .values({
-      linearUserId: viewer.id,
-      organizationId: organization.id,
-      email: viewer.email,
-      displayName: viewer.displayName,
-      avatarUrl: viewer.avatarUrl,
-    })
-    .onConflictDoUpdate({
-      target: [users.organizationId, users.linearUserId],
-      set: {
-        email: viewer.email,
-        displayName: viewer.displayName,
-        avatarUrl: viewer.avatarUrl,
-        updatedAt: sql`now()`,
-      },
-    })
-    .returning();
-
   const scopes = Array.isArray(tokens.scope)
-    ? tokens.scope
-    : tokens.scope.split(/[,\s]+/).filter(Boolean);
-  await db
-    .insert(linearConnections)
-    .values({
-      userId: user.id,
-      encryptedAccessToken: encryptSecret(tokens.access_token),
-      encryptedRefreshToken: encryptSecret(tokens.refresh_token),
-      scopes,
-      expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
-    })
-    .onConflictDoUpdate({
-      target: linearConnections.userId,
-      set: {
-        encryptedAccessToken: encryptSecret(tokens.access_token),
-        encryptedRefreshToken: encryptSecret(tokens.refresh_token),
-        scopes,
-        expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
-        updatedAt: new Date(),
-      },
-    });
-
-  await createUserSession(user.id);
+    ? tokens.scope : tokens.scope.split(/[,\s]+/).filter(Boolean);
+  await completeLogin({
+    linearUserId: viewer.id, organizationId: organization.id,
+    email: viewer.email, displayName: viewer.displayName, avatarUrl: viewer.avatarUrl,
+    accessToken: tokens.access_token, refreshToken: tokens.refresh_token, scopes,
+    expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
+  });
   cookieStore.delete("linear_oauth_state");
   cookieStore.delete("linear_oauth_verifier");
   cookieStore.delete("linear_oauth_return");
