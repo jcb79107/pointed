@@ -80,3 +80,8 @@ before changes to a production database.
 - Unit/integration suite: 169 tests passed; types, lint, and build passed.
 - The provider token exchange is covered with mocks; this is not evidence of a
   fresh human Linear sign-in or a real two-team pilot.
+- Release dependency audit found vulnerable Next.js/source-map-js versions;
+  patched to Next.js 16.3.8 and source-map-js 1.2.2. Production dependency audit
+  reports zero vulnerabilities. The full audit still reports the development-only
+  `braces`/`micromatch` chain used by Next's ESLint plugin; no compatible fix is
+  available. The suggested forced downgrade is not applied.
