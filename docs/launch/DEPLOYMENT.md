@@ -1,28 +1,23 @@
-# Release deployment — September 30, 2026
+# Verified deployment baseline — October 10, 2026
 
-- Production: https://public-linear-pointing.vercel.app/
-- Immutable deployment: https://public-linear-pointing-9j9p8wi68-jcb79107s-projects.vercel.app
-- Vercel ID: `dpl_5TskwGKTh4d1LuRcZJV7iUBPeQ2v`
-- Deployed local revision: `74a1b33` (tree `1b048557ea2e430d54b3bb3787fd7bb0e71c3a3f`).
-- Production build: Next.js 16.3.7, successful on Vercel.
-- No new migrations beyond previously applied 0006/0007.
+This records the security release baseline, not a permanently current deployment ID. Later maintenance releases are tracked by their GitHub PR checks and Vercel deployment status.
+
+- Production alias: https://public-linear-pointing.vercel.app/
+- Immutable deployment: https://public-linear-pointing-aat7z3qu0-jcb79107s-projects.vercel.app
+- Vercel ID: `dpl_5jocW5G7vs74XDgAgkLc9QZedGve`
+- Revision: `6dbc5b46de63e23fb13a8082042dc55b014b6085`
+- Release: [PR #22](https://github.com/jcb79107/pointed/pull/22)
+- Required CI: [run 38072657506](https://github.com/jcb79107/pointed/actions/runs/38072657506)
+- Next.js 16.3.8; nine migrations, through 0008; restricted runtime and OAuth database roles.
 
 ## Evidence
 
-123 tests across 27 files pass. All 88 browser checks pass across Chromium desktop/tablet/phone and WebKit phone against the local production build and isolated fixtures. Lint, typecheck, production build, and strict static UI audit pass. Full npm audit: zero known vulnerabilities. Gitleaks scanned 18 commits with no findings.
+169 unit/integration tests across 32 files and 120 browser checks passed, along with lint, types, production build, and production dependency audit. Browser coverage uses the demo and isolated fixtures; it is not live Linear writeback evidence.
 
-Production probes passed for `/`, `/demo`, `/privacy`, `/support`, and `/api/health`. A clean browser opened the demo and revealed the round without page errors. The deployment's error-level log query returned zero records during verification; this is a short observation window, not proof of absence of all defects.
+Production probes passed for landing, demo, privacy, support, database health, and OAuth start. A subsequent signed-out walkthrough exercised demo reveal/save/next and mobile layout without page errors. Existing authenticated dashboard/team listing worked. Database checks verified restricted roles and cross-workspace denial with rolled-back fixtures.
 
-## Publication
+Sentry error and feedback ingestion and notification delivery have been verified. Recording is opt-in; see [data boundaries](SENTRY.md). See [readiness](READINESS.md) for live integration, recovery, and real-team pilot limits.
 
-GitHub authentication and explicitly approved workflow permission were restored on September 30. The complete local release is published in PR #4. Main now requires a pull request and the trusted GitHub Actions `verify` check, with force pushes/deletions blocked. CI includes the 123 tests, types/lint, dependency audit, production build, and Chromium/WebKit browser suite. Scheduled health checks activate on merge to main.
+## Maintenance releases
 
-The first Linux run failed clean installation because optional `@emnapi` entries were missing from the lockfile. Regenerating with npm 10.9.9 fixed clean-install validation; the repaired revision is subject to the full required CI run before merge. Current checks and deployment status are linked from PR #4.
-
-Anonymous `/api/sessions` and `DELETE /api/account` returned 401. The account page emitted an authentication redirect without account controls.
-
-An isolated historical recovery drill passed on September 30; see [restore evidence](RESTORE-DRILL.md). Production still passed all public/health probes afterwards.
-
-## Remaining gates
-
-See [readiness](READINESS.md): disposable two-account / two-workspace provider exercise, a suitable history-retention window and populated-session recovery verification, notification delivery, and 2–3-team pilot. No employer tickets were changed during validation.
+Merge through the required `verify` check, let the linked Vercel project deploy the merged revision, and inspect the deployment before probing the production alias. Do not assume a successful merge means the alias has switched. No database migration is needed for the October 11 branding/documentation cleanup.

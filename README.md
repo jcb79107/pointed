@@ -80,7 +80,7 @@ pending release and real Linear integration checks.
 2. Create a Neon database. Follow [database isolation setup](docs/launch/DATABASE-ISOLATION.md) to migrate as the owner and provision the two restricted app connections.
 3. Copy `.env.example` to `.env.local` and fill the required values. Generate the token
    key with `openssl rand -base64 32`.
-4. Apply migrations and start the app:
+4. After completing the database isolation setup, install dependencies and start the app:
 
 ```bash
 npm install

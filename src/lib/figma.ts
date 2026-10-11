@@ -30,7 +30,7 @@ export function extractFigmaUrls(text: string | null | undefined): string[] {
 }
 
 export function figmaEmbedUrl(value: string): string {
-  return `https://www.figma.com/embed?embed_host=linear-pointing&url=${encodeURIComponent(value)}`;
+  return `https://www.figma.com/embed?embed_host=pointed&url=${encodeURIComponent(value)}`;
 }
 
 export function figmaPreviewTitle(value: string): string {

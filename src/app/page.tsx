@@ -20,7 +20,7 @@ export default function Home() {
         <div className="nav-actions">
           <a
             className="landing-nav-link"
-            href="https://github.com/jcb79107/linear-pointing"
+            href="https://github.com/jcb79107/pointed"
             rel="noreferrer"
             target="_blank"
           >
@@ -162,7 +162,7 @@ export default function Home() {
         </div>
         <nav aria-label="Footer navigation">
           <a
-            href="https://github.com/jcb79107/linear-pointing"
+            href="https://github.com/jcb79107/pointed"
             rel="noreferrer"
             target="_blank"
           >
