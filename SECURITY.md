@@ -2,7 +2,7 @@
 
 Security fixes target the current production release and `main`.
 
-Use [GitHub private vulnerability reporting](https://github.com/jcb79107/linear-pointing/security/advisories/new). Do not report vulnerabilities in public issues. Include reproducible steps, affected routes/version, and the impact; redact credentials and private ticket data. Test only your own accounts and authorized disposable data. There is no guaranteed response time or paid bounty.
+Use [GitHub private vulnerability reporting](https://github.com/jcb79107/pointed/security/advisories/new). Do not report vulnerabilities in public issues. Include reproducible steps, affected routes/version, and the impact; redact credentials and private ticket data. Test only your own accounts and authorized disposable data. There is no guaranteed response time or paid bounty.
 
 Pointed uses server-side authorization, encrypted provider credentials, hashed session tokens, same-origin checks, and hidden votes until reveal. These controls are tested but are not a claim of independent security certification. See [data handling](https://public-linear-pointing.vercel.app/privacy).
 

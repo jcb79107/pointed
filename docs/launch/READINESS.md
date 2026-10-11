@@ -1,33 +1,32 @@
-# Pointed launch readiness
+# Pointed beta readiness
 
-Assessed September 29–30, 2026. Pointed is a public beta, not yet a broadly validated release.
+Updated October 11, 2026. Pointed is ready to invite a small beta group, with the live integration and pilot limits below made explicit.
 
-## Verified locally
+## Verified release baseline
 
-- 123 tests across 27 files pass, including database migrations/cascades, authenticated account deletion, private voting rules, cycle intake, and Slack request boundaries.
-- Lint, TypeScript, and the Next.js 16.3.7 production build pass.
-- All 88 Chromium desktop/tablet/phone and WebKit phone tests pass against the demo and isolated settings/queue fixtures.
-- Full npm dependency audit reports zero known vulnerabilities after updating Next.js, sharp, and development dependencies.
-- Gitleaks 8.30.1 reports no secrets in the 18-commit history or tracked/unignored release files.
-- Landing/demo use Richard, Dinesh, and Gilfoyle as developers, with Jared facilitating.
+The October 10 security release, [PR #22](https://github.com/jcb79107/pointed/pull/22), passed 169 unit/integration tests across 32 files and 120 Chromium/WebKit browser checks. Lint, types, and the Next.js 16.3.8 production build passed. The production dependency audit found no known vulnerabilities. The full audit still reported a development-only braces/micromatch chain in the Next ESLint tooling; no compatible fix was available at verification.
 
-These are synthetic/isolated tests, not proof of live provider writeback, multi-workspace isolation, field performance, or complete accessibility conformance.
+All 14 application tables enforce RLS. The deployed runtime and OAuth connections use restricted roles; anonymous access and cross-workspace denial were exercised with disposable, rolled-back database fixtures. See [database isolation](DATABASE-ISOLATION.md). App-level membership, facilitator permissions, and vote secrecy remain necessary alongside RLS.
 
-## Delivered release safeguards
+A signed-out production walkthrough covered landing, demo reveal/save/next, mobile layout, sign-in entry, and feedback open/cancel. Existing-account sign-in and team listing also worked. Demo people are Richard Hendricks, Dinesh Chugtai, Gilfoyle, and facilitator Jared Dunn. Public pages, health, and OAuth start passed smoke checks.
 
-Public help and privacy pages; transactional, authenticated account deletion; same-origin logout; generic unexpected API errors with references; database health endpoint; CI with browser checks and dependency audit; scheduled production probes; contribution/security guidance; issue templates and dependency update automation. Monitoring schedules activate when merged to the default branch. Notification delivery remains unverified.
+These checks do not prove fresh OAuth completion, live Linear writeback, field performance, or complete accessibility conformance.
 
-## Repository publication
+## Delivered safeguards
 
-The complete release is published in [PR #4](https://github.com/jcb79107/linear-pointing/pull/4). Main is protected: pull requests, up-to-date branches, the GitHub Actions `verify` check, and resolved review conversations are required; force pushes and deletion are blocked, including for administrators. Expanded CI runs on pull requests and main. The health schedule activates once merged to main. The first Linux run exposed missing optional runtime entries; the lockfile was repaired with CI’s npm version and clean-install validation passed.
+Privacy and support pages, account deletion, same-origin mutations, sanitized error references, restricted database roles, CI, scheduled availability probes, security reporting, and dependency updates are in place. Main requires a pull request and the `verify` check.
 
-## Required before broad promotion
+Sentry receives filtered errors and optional feedback. Recording starts only on explicit request; screenshots and recording attachments are optional. Sentry notification email delivery was confirmed by the maintainer. GitHub Actions notification delivery is a separate, unverified check. See [Sentry boundaries](SENTRY.md).
 
-1. Run a full session using a disposable Linear team and two authorized accounts: import the configured cycle, reorder/remove, browse independently, vote privately, reconnect, reveal, save an estimate, verify Linear, then delete the session. Repeat authorization checks across a second workspace. Live sign-in/team listing succeeded, but the available account exposed only an employer workspace, so no test session or ticket mutation was performed there.
-2. Historical recovery was verified in an isolated branch: see [restore drill](RESTORE-DRILL.md). Retention is only 6 hours. Choose a longer recovery window before relying on this for broader use, and repeat with populated disposable sessions; the current database has none.
-3. Run the small pilot with 2–3 real teams and observe a complete session. Collect failures and task friction, not just preferences. No pilot evidence is claimed.
-4. Confirm failure notifications reach the maintainer. Health checks cover availability, not every application error. Measure actual traffic before claiming Core Web Vitals targets.
+## Remaining validation
 
-## Release operations
+1. Run a complete session with two authorized accounts and disposable Linear issues: cycle import, reorder/remove, independent browsing, private votes, reconnect, reveal, writeback, and deletion. Repeat access checks across a second real workspace. No employer tickets were mutated during verification.
+2. Recheck backup retention and repeat recovery with populated disposable sessions. The September 30 [restore drill](RESTORE-DRILL.md) passed, but the window observed then was only six hours; current retention has not been reverified.
+3. Observe 2–3 real teams completing a session. No real-team pilot evidence is claimed yet.
+4. Verify GitHub failure notifications and assess performance with actual traffic before claiming field Core Web Vitals targets.
 
-See [operations and recovery](OPERATIONS.md) and the final [deployment record](DEPLOYMENT.md). Older `docs/pilot` reports describe earlier builds and are retained as historical evidence.
+## Branding and launch URL
+
+Current public copy and repository links use Pointed. Historical reports retain their original observations. Existing theme-storage keys remain compatible so returning users keep their preference. The Vercel project/origin remains unchanged until a domain is selected; follow the [domain cutover checklist](DOMAIN.md).
+
+See [operations](OPERATIONS.md) and the [deployment baseline](DEPLOYMENT.md).

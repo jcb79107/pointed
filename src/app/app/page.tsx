@@ -55,7 +55,7 @@ export default async function AppHome({
           </small>
           <a
             className="auth-source-link"
-            href="https://github.com/jcb79107/linear-pointing"
+            href="https://github.com/jcb79107/pointed"
             rel="noreferrer"
             target="_blank"
           >

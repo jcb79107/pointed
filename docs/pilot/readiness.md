@@ -1,3 +1,5 @@
+> Historical verification of an earlier build. See [current launch readiness](../launch/READINESS.md) for the latest assessment.
+
 # Pilot readiness review
 
 > Historical evidence. For current release status, see [launch readiness](../launch/READINESS.md). Later fixes and deployments supersede the status statements below.

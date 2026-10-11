@@ -6,7 +6,7 @@ Goal: help 2–3 teams run one real refinement session each, observe friction, a
 
 ## 1. Invitation — draft only
 
-> Would your team try Linear Pointing in one upcoming refinement session? I’m inviting 2–3 teams to help test the basics: choose Linear issues, vote privately, discuss an estimate, and save it back to Linear. I’d join to observe where the app gets in your way, then ask for five minutes of feedback. Plan on 30 minutes with 3–5 issues and your usual teammates. Everyone needs Linear access to the same team; the facilitator also needs permission to authorize estimate updates. It’s an early pilot, and we’ll check setup together before the session. Would you be open to being the first team?
+> Would your team try Pointed in one upcoming refinement session? I’m inviting 2–3 teams to help test the basics: choose Linear issues, vote privately, discuss an estimate, and save it back to Linear. I’d join to observe where the app gets in your way, then ask for five minutes of feedback. Plan on 30 minutes with 3–5 issues and your usual teammates. Everyone needs Linear access to the same team; the facilitator also needs permission to authorize estimate updates. It’s an early pilot, and we’ll check setup together before the session. Would you be open to being the first team?
 >
 > Optional preview: https://public-linear-pointing.vercel.app/demo — sample data only; this is a single-browser simulation, not a shared room.
 
