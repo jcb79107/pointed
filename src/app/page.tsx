@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Brand } from "@/components/Brand";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const revealedVotes = [
   { initials: "RH", name: "Richard", vote: 3 },

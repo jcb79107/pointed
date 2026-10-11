@@ -4,6 +4,7 @@ import "./globals.css";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL ?? "https://getpointed.app"),
   title: {
     default: "Pointed",
     template: "%s · Pointed",

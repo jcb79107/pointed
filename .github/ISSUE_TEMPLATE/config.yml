@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/jcb79107/pointed/security/advisories/new
     about: Report vulnerabilities privately; never include them in public issues.
   - name: Getting started and troubleshooting
-    url: https://public-linear-pointing.vercel.app/support
+    url: https://getpointed.app/support
     about: Session setup, missing tickets, permissions, and data deletion.

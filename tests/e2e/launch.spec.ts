@@ -28,3 +28,15 @@ test('account deletion confirms and preserves recovery after an error',async({pa
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Could not delete');
   expect(requests).toBe(1);
 });
+
+test('legacy and www links preserve invitation paths and queries on the canonical domain', async ({request}) => {
+  for (const host of ['public-linear-pointing.vercel.app', 'www.getpointed.app']) {
+    const response = await request.get('/s/fixture-invite?from=shared-link', {
+      headers: { host }, maxRedirects: 0,
+    });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe('https://getpointed.app/s/fixture-invite?from=shared-link');
+  }
+  const canonical = await request.get('/demo', {headers: {host: 'getpointed.app'}, maxRedirects: 0});
+  expect(canonical.status()).toBe(200);
+});

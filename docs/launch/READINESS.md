@@ -27,6 +27,6 @@ Sentry receives filtered errors and optional feedback. Recording starts only on 
 
 ## Branding and launch URL
 
-Current public copy and repository links use Pointed. Historical reports retain their original observations. Existing theme-storage keys remain compatible so returning users keep their preference. The Vercel project/origin remains unchanged until a domain is selected; follow the [domain cutover checklist](DOMAIN.md).
+Current public copy and repository links use Pointed. Historical reports retain their original observations. Existing theme-storage keys remain compatible so returning users keep their preference. The public domain is `getpointed.app`; the Vercel project keeps its existing technical name. See the [domain cutover record](DOMAIN.md).
 
 See [operations](OPERATIONS.md) and the [deployment baseline](DEPLOYMENT.md).

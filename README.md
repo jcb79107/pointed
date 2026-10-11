@@ -1,6 +1,6 @@
 # <img src="public/pointed-mark.svg" width="40" alt="" /> Pointed
 
-[Open Pointed](https://public-linear-pointing.vercel.app) · [Try the demo](https://public-linear-pointing.vercel.app/demo) · [Help](https://public-linear-pointing.vercel.app/support) · [Privacy](https://public-linear-pointing.vercel.app/privacy)
+[Open Pointed](https://getpointed.app) · [Try the demo](https://getpointed.app/demo) · [Help](https://getpointed.app/support) · [Privacy](https://getpointed.app/privacy)
 
 ![Pointed session with private voting and a shared agenda](docs/launch/pointed-session.png)
 

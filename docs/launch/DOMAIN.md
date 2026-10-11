@@ -1,6 +1,17 @@
-# Moving Pointed to a custom domain
+# Pointed custom domain
 
-Choose and purchase a domain before changing application URLs. The existing Vercel origin remains the working production address until cutover is verified.
+`https://getpointed.app` is the selected public origin. DNS remains at Porkbun. Vercel verified the apex records on October 11, 2026:
+
+- `A @ 216.198.79.1`
+- `A @ 64.29.17.1`
+- `CNAME www f327c0e4ce35d215.vercel-dns-017.com`
+- TTL: 600 seconds. These are this project’s returned records, not universal Vercel defaults.
+
+After deploying this cutover, the application redirects the old public Vercel hostname and `www` to the apex with a reversible 307, preserving paths and queries. Other deployment/preview hosts remain accessible. Users must sign in again because cookies are host-bound. An OAuth flow begun on the old host during cutover must be restarted on the new host; do not copy authentication cookies or codes between domains.
+
+## Cutover and future domain changes
+
+The domain is purchased and HTTPS is serving the app. Before merging/deploying the cutover, register the new Linear OAuth callback and update production `APP_URL` and `LINEAR_REDIRECT_URI`. The existing Vercel origin remains the working sign-in address until those steps are verified.
 
 1. Add the chosen domain to the existing Vercel project. Use the DNS records Vercel actually returns; verify ownership and HTTPS.
 2. Add the new `/api/auth/linear/callback` URL to the Linear OAuth application before changing the app. Keep the old callback during transition. If Slack is enabled, update its OAuth redirect configuration too.
