@@ -236,7 +236,7 @@ export function LiveRoom({
           8_000,
         );
         if (!response.ok || !data.snapshot) {
-          throw new Error(data.error ?? "Could not refresh the room");
+          throw new Error(data.error ?? "Could not refresh the session");
         }
         setSnapshot(data.snapshot);
         setSyncState("connected");
@@ -815,11 +815,7 @@ export function LiveRoom({
   }
 
   async function refreshLinearPreview() {
-    if (demoMode) {
-      setPreviewNotice("Demo ticket preview refreshed.");
-      window.setTimeout(() => setPreviewNotice(null), 2200);
-      return;
-    }
+    if (demoMode) return;
     setRefreshingIssue(true);
     setError(null);
     setPreviewNotice(null);
@@ -1168,8 +1164,8 @@ export function LiveRoom({
           <LoaderCircle className={syncState === "reconnecting" ? "spin" : ""} size={14} />
           <span>
             {syncState === "offline"
-              ? "You’re offline. The room will catch up automatically."
-              : "Reconnecting to the room…"}
+              ? "You’re offline. The session will reconnect automatically."
+              : "Reconnecting to the session…"}
           </span>
           <button onClick={() => void refresh()} type="button">
             Retry now
@@ -1422,7 +1418,7 @@ export function LiveRoom({
                   <span>{viewedItem.priorityLabel ?? "No priority"}</span>
                   <i />
                   <span>{viewedItem.stateName ?? "No status"}</span>
-                  <div className="issue-source-actions">
+                  {!demoMode && <div className="issue-source-actions">
                     <button
                       aria-label="Refresh ticket preview from Linear"
                       disabled={refreshingIssue || browsing}
@@ -1439,7 +1435,7 @@ export function LiveRoom({
                     <a href={viewedItem.url} target="_blank" rel="noreferrer">
                       Open in Linear <ExternalLink size={13} />
                     </a>
-                  </div>
+                  </div>}
                 </div>
                 <h1>{viewedItem.title}</h1>
                 <div className="issue-tags">
@@ -1639,7 +1635,7 @@ export function LiveRoom({
 
         <aside className="room-team">
           <div className="pane-heading">
-            <span>ROOM</span>
+            <span>TEAM</span>
             <b>
               <Users size={13} /> {snapshot.participants.length}
             </b>
@@ -1943,8 +1939,9 @@ function SessionSummary({
               : item.status === "skipped"
                 ? "skipped"
                 : null);
+          const TicketLink = demoMode ? "div" : "a";
           return (
-            <div className="summary-item" key={item.id}><a href={item.url} rel="noreferrer" target="_blank">
+            <div className="summary-item" key={item.id}><TicketLink className="summary-ticket" {...(!demoMode ? { href: item.url, rel: "noreferrer", target: "_blank" } : {})}>
               <div>
                 <b>{item.identifier}</b>
                 <span>{item.title}</span>
@@ -1954,7 +1951,7 @@ function SessionSummary({
                 {item.finalEstimate !== null && ` · ${voteLabel(item.finalEstimate, cards)}`}
                 {item.elapsedSeconds > 0 && ` · ${formatDuration(item.elapsedSeconds)}`}
               </em>
-            </a>{isFacilitator && item.status === "skipped" && <button type="button" disabled={busy} onClick={() => onResume(item.id)}>Revisit {item.identifier}</button>}</div>
+            </TicketLink>{isFacilitator && item.status === "skipped" && <button type="button" disabled={busy} onClick={() => onResume(item.id)}>Revisit {item.identifier}</button>}</div>
           );
         })}
       </div>

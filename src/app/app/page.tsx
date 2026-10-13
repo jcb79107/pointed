@@ -59,11 +59,11 @@ export default async function AppHome({
             rel="noreferrer"
             target="_blank"
           >
-            Review the open-source code and data flow
+            View source on GitHub
           </a>
           <nav className="auth-discovery-links" aria-label="More about Pointed">
             <Link href="/">How Pointed works</Link>
-            <Link href="/demo">Try the sample session</Link>
+            <Link href="/demo">Try the demo</Link>
           </nav>
         </section>
       </main>
