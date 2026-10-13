@@ -35,7 +35,7 @@ Prepare unestimated tickets in a Linear cycle. Load them into Pointed, adjust th
 - a responsive room with issue Markdown, attachments, embedded Figma designs,
   sub-issues, queue progress, roster, and phone-friendly voting controls
 - independent participant browsing, mobile revealed votes, and skipped-ticket revisit
-- the selected Linear team’s native scale, zero allowance, extended values,
+- the selected Linear team’s positive scale values, extended values,
   and T-shirt labels inherited by every new session
 - secret replaceable votes, configurable automatic reveal, early reveal,
   facilitator voting, observers, absences, late joins, revotes, and issue revisit
@@ -91,8 +91,9 @@ Pusher is optional. Without it, the room uses a 5-second polling fallback. Add
 the Pusher variables when you want more responsive live updates.
 
 All Linear teams with estimates enabled appear in the team picker. Every new session
-uses the selected team's exact scale. The MVP has no custom deck override;
-existing rooms retain their snapshotted cards.
+uses the selected team's positive estimate values and labels. Zero is not offered
+for voting or saving estimates, including in existing rooms. Previously saved
+estimates remain unchanged. The MVP has no custom deck override.
 
 ## Verification
 

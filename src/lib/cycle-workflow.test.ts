@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   access: vi.fn(),
   resolve: vi.fn(),
   issues: vi.fn(),
+  getIssue: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/db", () => ({
@@ -32,12 +33,12 @@ vi.mock("@/lib/linear", () => ({
   userHasTeamAccess: mocks.access,
   resolveSessionIntake: mocks.resolve,
   loadIntakeIssues: mocks.issues,
-  getLinearIssue: vi.fn(),
+  getLinearIssue: mocks.getIssue,
   updateLinearIssueEstimate: vi.fn(),
 }));
 vi.mock("@/lib/realtime", () => ({ broadcastSessionChanged: vi.fn() }));
 import { getTeamDefaults, saveTeamDefaults } from "./team-settings";
-import { createPokerSession, getSessionSnapshot } from "./sessions";
+import { createPokerSession, getSessionSnapshot, startPokerSession, castVote, revealRound, finalizeEstimate } from "./sessions";
 import { loadSessionAgenda, updateDraftDefaults } from "./session-intake";
 let client: PGlite;
 const db = () => mocks.db!;
@@ -119,6 +120,7 @@ afterAll(async () => {
   await client.close();
 });
 beforeEach(() => {
+  mocks.getIssue.mockReset().mockResolvedValue(issue("1", 10));
   mocks.access.mockReset().mockResolvedValue(true);
   mocks.resolve.mockReset().mockResolvedValue(intake);
   mocks.issues.mockReset().mockResolvedValue([issue("2", 20), issue("1", 10)]);
@@ -307,4 +309,25 @@ it("refuses a stale import when the session changes during the Linear read", asy
   });
   await expect(loadSessionAgenda(session.id, user.id, DEFAULT_TEAM_DEFAULTS)).rejects.toThrow("agenda changed");
   expect((await getSessionSnapshot(session.id, user.id)).queue).toEqual(before);
+});
+
+
+it("excludes zero in new and existing real rooms and rejects legacy zero submissions", async () => {
+  const user = await actor();
+  const session = await draft(user.id, user.organizationId);
+  expect(session.pointingCards).toEqual([{ value: 1, label: "1" }]);
+  const legacyCards = [{ value: 0, label: "0" }, { value: 1, label: "1" }];
+  await db().update(schema.pokerSessions).set({ pointingCards: legacyCards }).where(eq(schema.pokerSessions.id, session.id));
+  await loadSessionAgenda(session.id, user.id, DEFAULT_TEAM_DEFAULTS);
+  await db().update(schema.participants).set({ votingEnabled: true }).where(eq(schema.participants.sessionId, session.id));
+  await startPokerSession(session.id, user.id);
+  const snapshot = await getSessionSnapshot(session.id, user.id);
+  expect(snapshot.estimateCards).toEqual([{ value: 1, label: "1" }]);
+  expect(snapshot.elapsedSeconds).toBe(0);
+  expect(snapshot.queue.find(item => item.id === snapshot.activeItemId)?.elapsedSeconds).toBe(0);
+  await db().update(schema.rounds).set({ scaleValues: [0, 1] }).where(eq(schema.rounds.id, snapshot.round!.id));
+  await expect(castVote({ sessionId: session.id, userId: user.id, value: 0 })).rejects.toThrow("Vote must be one of: 1");
+  await castVote({ sessionId: session.id, userId: user.id, value: 1 });
+  await revealRound(session.id, user.id);
+  await expect(finalizeEstimate({ sessionId: session.id, userId: user.id, estimate: 0 })).rejects.toThrow("Final estimate must be one of: 1");
 });

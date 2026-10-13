@@ -35,7 +35,7 @@ import type {
   VoteValue,
   TeamDefaults,
 } from "@/lib/domain";
-import { isFinalizableEstimate } from "@/lib/estimates";
+import { isFinalizableEstimate, selectableEstimateCards } from "@/lib/estimates";
 import {
   getLinearIssue,
   updateLinearIssueEstimate,
@@ -114,7 +114,8 @@ export async function createPokerSession(input: {
   autoReveal: boolean;
   defaults?: TeamDefaults;
 }) {
-  if (!input.pointingCards.length) throw new Error("Choose at least one pointing value");
+  const pointingCards = selectableEstimateCards(input.pointingCards);
+  if (!pointingCards.length) throw new Error("Choose at least one pointing value");
 
   return db.transaction(async (tx) => {
     const [session] = await tx
@@ -129,7 +130,7 @@ export async function createPokerSession(input: {
         scaleType: input.team.issueEstimationType,
         scaleAllowZero: input.team.issueEstimationAllowZero,
         scaleExtended: input.team.issueEstimationExtended,
-        pointingCards: input.pointingCards,
+        pointingCards,
         autoReveal: input.autoReveal,
         defaults: input.defaults,
       })
@@ -505,7 +506,7 @@ async function createRound(
       queueItemId,
       number: (highestRound ?? 0) + 1,
       estimateAtStart,
-      scaleValues: session.pointingCards.map((card) => card.value),
+      scaleValues: selectableEstimateCards(session.pointingCards).map((card) => card.value),
     })
     .returning();
 
@@ -715,7 +716,7 @@ export async function getSessionSnapshot(
     teamName: session.teamName,
     scaleType:
       session.scaleType as LinearTeamSummary["issueEstimationType"],
-    estimateCards: session.pointingCards,
+    estimateCards: selectableEstimateCards(session.pointingCards),
     autoReveal: session.autoReveal,
     intake: session.intake,
     defaults: session.defaults ?? undefined,
@@ -881,7 +882,7 @@ export async function castVote(input: {
       .limit(1);
     if (!eligible) throw new Error("You are observing this round");
 
-    const validValues = round.scaleValues;
+    const validValues = round.scaleValues.filter((value) => value > 0);
     if (!validValues.includes(input.value)) {
       throw new Error(`Vote must be one of: ${validValues.join(", ")}`);
     }
@@ -1444,7 +1445,7 @@ export async function finalizeEstimate(input: {
 
   if (!isFinalizableEstimate(input.estimate, session.pointingCards)) {
     throw new Error(
-      `Final estimate must be one of: ${session.pointingCards.map((card) => card.label).join(", ")}`,
+      `Final estimate must be one of: ${selectableEstimateCards(session.pointingCards).map((card) => card.label).join(", ")}`,
     );
   }
 

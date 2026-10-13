@@ -21,8 +21,8 @@ export function presetPointValues(
   customValues: number[] = [],
 ): number[] {
   if (preset === "linear-team") return [];
-  if (preset === "custom") return customValues;
-  return PRESET_VALUES[preset];
+  if (preset === "custom") return customValues.filter((value) => value > 0);
+  return PRESET_VALUES[preset].filter((value) => value > 0);
 }
 
 export function linearTeamEstimateCards(
@@ -51,9 +51,7 @@ export function linearTeamEstimateCards(
     default:
       return [];
   }
-  return team.issueEstimationAllowZero
-    ? [{ value: 0, label: "0" }, ...cards]
-    : cards;
+  return cards;
 }
 
 export function resolvePointingCards(
@@ -93,6 +91,12 @@ export function isFinalizableEstimate(
 ): value is number {
   return (
     typeof value === "number" &&
+    value > 0 &&
     cards.some((candidate) => candidate.value === value)
   );
+}
+
+/** Keep historical stored decks intact while excluding zero from active choices. */
+export function selectableEstimateCards(cards: EstimateCard[]): EstimateCard[] {
+  return cards.filter((card) => card.value > 0);
 }

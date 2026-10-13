@@ -6,6 +6,7 @@ import {
   linearTeamEstimateCards,
   resolvePointingCards,
   voteLabel,
+  selectableEstimateCards,
 } from "@/lib/estimates";
 
 describe("pointing scale", () => {
@@ -32,14 +33,14 @@ describe("pointing scale", () => {
       issueEstimationExtended: true,
     };
     expect(linearTeamEstimateCards(team).map((card) => card.value)).toEqual([
-      0, 1, 2, 3, 5, 8, 13, 21,
+      1, 2, 3, 5, 8, 13, 21,
     ]);
     expect(
       resolvePointingCards(
         { pointingPreset: "custom", customPointValues: [0, 1, 3, 8] },
         team,
       ).map((card) => card.value),
-    ).toEqual([0, 1, 3, 8]);
+    ).toEqual([1, 3, 8]);
     expect(() =>
       resolvePointingCards(
         { pointingPreset: "custom", customPointValues: [0, 1, 4] },
@@ -47,4 +48,12 @@ describe("pointing scale", () => {
       ),
     ).toThrow(/does not accept/);
   });
+});
+
+it("excludes zero from existing decks and rejects it for finalization without rewriting history", () => {
+  const cards = [{ value: 0, label: "0" }, { value: 1, label: "XS" }, { value: 3, label: "M" }];
+  expect(selectableEstimateCards(cards)).toEqual(cards.slice(1));
+  expect(cards).toHaveLength(3);
+  expect(isFinalizableEstimate(0, cards)).toBe(false);
+  expect(isFinalizableEstimate(1, cards)).toBe(true);
 });
