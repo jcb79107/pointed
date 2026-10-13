@@ -7,14 +7,14 @@ const demoSnapshot: SessionSnapshot = {
   title: "Platform pointing",
   autoReveal: true,
   status: "live",
-  startedAt: new Date(Date.now() - 14 * 60_000).toISOString(),
+  startedAt: null,
   endedAt: null,
-  activeStartedAt: new Date(Date.now() - 14 * 60_000).toISOString(),
+  activeStartedAt: null,
   elapsedSeconds: 0,
   teamId: "demo-team",
   teamName: "Platform API",
   scaleType: "linear",
-  estimateCards: [0, 1, 2, 3, 4].map((value) => ({
+  estimateCards: [1, 2, 3, 4].map((value) => ({
     value,
     label: `${value}`,
   })),
@@ -59,7 +59,7 @@ const demoSnapshot: SessionSnapshot = {
       groomingOutcome: null,
       groomingNote: null,
       decidedAt: null,
-      activeStartedAt: new Date(Date.now() - 4 * 60_000).toISOString(),
+      activeStartedAt: null,
       elapsedSeconds: 0,
       linearCreatedAt: "2026-07-21T12:00:00.000Z",
       linearUpdatedAt: "2026-07-29T18:00:00.000Z",
@@ -183,7 +183,7 @@ const demoSnapshot: SessionSnapshot = {
     eligibleVoterIds: ["u1", "u2", "u3"],
     estimateAtStart: null,
     revealedAt: null,
-    createdAt: new Date().toISOString(),
+    createdAt: "2026-07-30T00:00:00.000Z",
   },
 };
 
@@ -193,6 +193,17 @@ export default async function DemoPage({
   searchParams: Promise<{ role?: string; state?: string }>;
 }) {
   const { role, state } = await searchParams;
+  const startedAt = new Date().toISOString();
+  const freshSnapshot: SessionSnapshot = {
+    ...demoSnapshot,
+    startedAt,
+    activeStartedAt: startedAt,
+    queue: demoSnapshot.queue.map((item) => ({
+      ...item,
+      activeStartedAt: item.status === "active" ? startedAt : null,
+    })),
+    round: demoSnapshot.round ? { ...demoSnapshot.round, createdAt: startedAt } : null,
+  };
   const roomSnapshot: SessionSnapshot =
     state === "draft"
       ? {
@@ -216,7 +227,7 @@ export default async function DemoPage({
           })),
           round: null,
         }
-      : demoSnapshot;
+      : freshSnapshot;
   const initialSnapshot =
     role === "voter"
       ? {

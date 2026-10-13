@@ -4035,7 +4035,7 @@ body {
 }
 
 .final-values {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
 }
 
 .final-values button {

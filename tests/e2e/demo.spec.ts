@@ -52,8 +52,8 @@ test('finish and resume without losing the remaining tickets', async ({ page }) 
 test('voter can change a private vote but cannot facilitate', async ({ page }) => {
   await page.goto('/demo?role=voter');
   await expect(page.getByRole('button', { name: /^(Reveal early|Skip|Finish for now)$/ })).toHaveCount(0);
-  const first = page.getByRole('button', { name: '1 points, shortcut 2', exact: true });
-  const second = page.getByRole('button', { name: '3 points, shortcut 4', exact: true });
+  const first = page.getByRole('button', { name: '1 points, shortcut 1', exact: true });
+  const second = page.getByRole('button', { name: '3 points, shortcut 3', exact: true });
   await first.click();
   await expect(first).toHaveAttribute('aria-pressed', 'true');
   await second.click();
@@ -98,7 +98,7 @@ for (const theme of ['light', 'dark'] as const) {
 
 test('keyboard voting and shortcut help', async ({ page }) => {
   await page.goto('/demo?role=voter');
-  const card = page.getByRole('button', { name: '2 points, shortcut 3', exact: true });
+  const card = page.getByRole('button', { name: '2 points, shortcut 2', exact: true });
   await card.focus();
   await page.keyboard.press('Enter');
   await expect(card).toHaveAttribute('aria-pressed', 'true');
@@ -147,7 +147,8 @@ test('revealed individual votes remain visible on phones', async ({ page }) => {
   await expect(votes).toContainText('Richard');
   await expect(votes).toContainText('Dinesh');
   await expect(votes).toContainText('Gilfoyle');
-  await expect(page.getByText('Votes range from 1–4. Discuss the difference before choosing.')).toBeVisible();
+  await expect(page.locator('.result-label')).toHaveText('FINAL ESTIMATEAverage 2.3');
+  await expect(page.locator('.final-values button')).toHaveText(['1', '2', '3', '4']);
 });
 
 test('participant browses ahead without moving the room or voting on the wrong ticket', async ({ page }) => {
@@ -155,10 +156,10 @@ test('participant browses ahead without moving the room or voting on the wrong t
   if ((page.viewportSize()?.width ?? 0) <= 1180) await page.getByLabel('Browse agenda').selectOption('q2');
   else await page.getByRole('button', { name: /02 Add workspace usage limits/ }).click();
   await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: '1 points, shortcut 2', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '1 points, shortcut 1', exact: true })).toBeDisabled();
   await page.getByRole('button', { name: 'Return to current ticket' }).click();
   await expect(page.getByRole('heading', { name: 'Retry failed webhook deliveries', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: '1 points, shortcut 2', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: '1 points, shortcut 1', exact: true })).toBeEnabled();
 });
 
 test('skipped tickets can be revisited from the summary', async ({ page }) => {
@@ -174,7 +175,20 @@ test('visible role switch opens a complete participant demo', async ({ page }) =
   await page.goto('/demo');
   await page.getByRole('navigation', { name: 'Demo role' }).getByRole('link', { name: 'Participant', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Reveal early' })).toHaveCount(0);
-  await page.getByRole('button', { name: '1 points, shortcut 2', exact: true }).click();
+  await page.getByRole('button', { name: '1 points, shortcut 1', exact: true }).click();
   await page.getByRole('button', { name: 'Show team votes' }).click();
   await expect(page.locator('.vote-dock-head')).toContainText('Votes revealed');
+});
+
+test('demo timer starts fresh on every visit and on the next ticket', async ({ page }) => {
+  await page.goto('/demo');
+  const timer = page.locator('.vote-dock .elapsed-timer');
+  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
+  await expect(timer).toHaveText(/^Time 0:0[3-9]$/, { timeout: 10000 });
+  await page.reload();
+  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
+  await expect(page.locator('.queue-footer')).toHaveCount(0);
+  await expect(page.getByText('You facilitate; the team points.')).toHaveCount(0);
 });
