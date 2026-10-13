@@ -36,8 +36,8 @@ test('participant can read the full ticket and vote on a short phone', async ({ 
   await page.goto('/demo?role=voter');
   const ticket = page.locator('.issue-scroll');
   expect(await ticket.evaluate(e => e.clientHeight >= e.scrollHeight - 1)).toBe(true);
-  await page.getByRole('button', { name: '3 points, shortcut 4', exact: true }).click();
-  await expect(page.getByRole('button', { name: '3 points, shortcut 4', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '3 points, shortcut 3', exact: true }).click();
+  await expect(page.getByRole('button', { name: '3 points, shortcut 3', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('header title and actions fit across tablet and desktop breakpoints', async ({ page }) => {

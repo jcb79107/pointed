@@ -427,9 +427,6 @@ export function LiveRoom({
   const revealedVotes = eligibleParticipants
     .map((participant) => participant.vote)
     .filter((vote): vote is number => vote !== null);
-  const voteSpread = revealedVotes.length
-    ? `${Math.min(...revealedVotes)}–${Math.max(...revealedVotes)}`
-    : null;
   const normalizedAddIssueQuery = addIssueQuery.trim().toLowerCase();
   const addQueuedMatch = normalizedAddIssueQuery
     ? snapshot.queue.find(
@@ -1412,12 +1409,6 @@ export function LiveRoom({
               );
             })}
           </div>
-          <div className="queue-footer">
-            <span>{snapshot.teamName}</span>
-            <small>
-              {snapshot.estimateCards.map((card) => card.label).join(" · ")}
-            </small>
-          </div>
         </aside>
 
         <section className="room-issue" ref={issuePaneRef}>
@@ -1557,9 +1548,9 @@ export function LiveRoom({
                         ? "Votes revealed"
                         : canVote
                           ? me?.hasVoted
-                            ? "Vote submitted — tap to change"
-                            : "Choose when you’re ready"
-                          : "Watching this round"}
+                            ? "Vote submitted"
+                            : "Your vote"
+                          : "Voting in progress"}
                     </b>
                   </div>
                   <span>
@@ -1570,7 +1561,7 @@ export function LiveRoom({
                       <ElapsedTimer
                         activeStartedAt={activeItem.activeStartedAt}
                         baseSeconds={activeItem.elapsedSeconds}
-                        label="Issue"
+                        label="Time"
                       />
                     )}
                   </span>
@@ -1601,31 +1592,16 @@ export function LiveRoom({
                     {demoMode && !isFacilitator && !revealed && <button className="text-action" disabled={!me?.hasVoted || browsing} onClick={() => demoAction("reveal", {})} type="button">Show team votes</button>}
                   </div>
                 ) : isFacilitator ? (
-                  <div
-                    className={`facilitator-wait ${eligibleVoterCount === 0 ? "no-voters" : ""}`}
-                  >
-                    <Users size={18} />
-                    <div>
-                      <b>
-                        {eligibleVoterCount === 0
-                          ? "No voters in this round yet."
-                          : "You facilitate; the team points."}
-                      </b>
-                      <span>
-                        {revealed
-                          ? "Review the suggested result and set the final estimate."
-                          : eligibleVoterCount === 0
-                            ? "Invite teammates, or set the estimate yourself when discussion is done."
-                          : snapshot.autoReveal === false ? "Reveal the votes when the team is ready." : "Votes reveal automatically when everyone has voted."}
-                      </span>
-                    </div>
-                    {eligibleVoterCount === 0 && !revealed && (
+                  eligibleVoterCount === 0 && !revealed ? (
+                    <div className="facilitator-wait no-voters">
+                      <Users size={18} />
+                      <b>No voters yet</b>
                       <button onClick={copyInvite} type="button">
                         {copied ? <Check size={14} /> : <Copy size={14} />}
                         {copied ? "Copied" : "Copy invite"}
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  ) : null
                 ) : (
                   <div className="facilitator-wait observer-wait">
                     <Eye size={18} />
@@ -1693,20 +1669,9 @@ export function LiveRoom({
             <div className="facilitator-controls">
               {revealed ? (
                 <>
-                  {revealedVotes.length > 1 && new Set(revealedVotes).size > 1 && <p className="vote-disagreement">Votes range from {voteSpread}. Discuss the difference before choosing.</p>}
                   <div className="result-label">
                     <span>FINAL ESTIMATE</span>
-                    <small>
-                      {finalEstimate?.queueItemId === activeItem.id
-                        ? "Your selection"
-                        : suggestedFinalEstimate === null
-                          ? "Choose after discussion"
-                          : `Average ${formatAverage(averageResult?.average)} → ${voteLabel(
-                              suggestedFinalEstimate,
-                              snapshot.estimateCards,
-                            )}`}
-                      {voteSpread && ` · votes ${voteSpread}`}
-                    </small>
+                    {averageResult && <small>Average {formatAverage(averageResult.average)}</small>}
                   </div>
                   <div className="final-values">
                     {snapshot.estimateCards.map((card) => (
