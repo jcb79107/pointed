@@ -34,7 +34,7 @@ test('reveal, revise a round, and save an explicit estimate', async ({ page }) =
   await page.getByRole('button', { name: 'Save estimate & next' }).click();
   await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Finish for now' }).click();
-  await expect(page.locator('.summary-list').getByRole('link').first()).toContainText('2');
+  await expect(page.locator('.summary-list .summary-ticket').first()).toContainText('2');
   await expect(page.locator('.session-summary')).toContainText('1 estimated');
 });
 
@@ -191,4 +191,13 @@ test('demo timer starts fresh on every visit and on the next ticket', async ({ p
   await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
   await expect(page.locator('.queue-footer')).toHaveCount(0);
   await expect(page.getByText('You facilitate; the team points.')).toHaveCount(0);
+});
+
+ test('demo does not offer fake Linear actions', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByRole('button', { name: 'Refresh ticket preview from Linear' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Open in Linear' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Finish for now' }).click();
+  await expect(page.locator('.summary-list')).toBeVisible();
+  await expect(page.locator('.summary-list a')).toHaveCount(0);
 });

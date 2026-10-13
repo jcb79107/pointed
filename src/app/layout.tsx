@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
   applicationName: "Pointed",
   description:
-    "Run private pointing sessions on Linear issues. Discuss the result, then let the facilitator choose what to save.",
+    "Run pointing sessions without sharing your screen. Read Linear tickets, vote privately, and save the agreed estimate.",
   icons: {
     icon: "/pointed-mark.svg",
     shortcut: "/pointed-mark.svg",
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Pointed · Team estimates for Linear",
-    description: "Bring issues into a shared room. Vote privately, discuss together, and let the facilitator confirm each estimate in Linear.",
+    description: "Read Linear tickets on your own screen, vote privately, and save the agreed estimate to Linear.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Pointed · Team estimates for Linear",
-    description: "Bring issues into a shared room. Vote privately, discuss together, and let the facilitator confirm each estimate in Linear.",
+    description: "Read Linear tickets on your own screen, vote privately, and save the agreed estimate to Linear.",
   },
 };
 

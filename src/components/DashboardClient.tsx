@@ -56,7 +56,7 @@ function suggestedSessionTitle() {
     month: "short",
     day: "numeric",
   }).format(new Date());
-  return `Grooming · ${date}`;
+  return `Pointing · ${date}`;
 }
 
 export function DashboardClient({
@@ -124,7 +124,6 @@ export function DashboardClient({
           <div>
             <p className="step-label">LINEAR PLANNING POKER</p>
             <h1>Pointing sessions</h1>
-            <p>Create a session, choose its Linear tickets, and share the link.</p>
           </div>
           {!creating && <button
             className="button button-primary button-large"
@@ -150,7 +149,7 @@ export function DashboardClient({
               <div>
                 <b>New session</b>
                 <p>
-                  Choose a team, then preview its cycle agenda. Estimates use the team’s Linear scale.
+                  Estimates use your team’s Linear scale.
                 </p>
               </div>
             </div>
@@ -216,7 +215,7 @@ export function DashboardClient({
             <div className="empty-sessions">
               <CircleDot size={24} />
               <b>No pointing sessions yet</b>
-              <p>Create a session, pull in Linear tickets, and share the room.</p>
+              <p>Choose a team above to get started.</p>
               <button
                 className="button button-ghost"
                 onClick={() => {
@@ -254,7 +253,7 @@ export function DashboardClient({
                       <b>{session.title}</b>
                       <span>
                         {session.teamName} · {session.issueCount}{" "}
-                        {session.issueCount === 1 ? "issue" : "issues"}
+                        {session.issueCount === 1 ? "ticket" : "tickets"}
                       </span>
                     </div>
                     <div className="session-meta">

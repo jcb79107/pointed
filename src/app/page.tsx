@@ -40,11 +40,10 @@ export default function Home() {
       <section className="landing-hero">
         <div className="landing-hero-copy">
           <p className="landing-kicker">POINTING POKER FOR LINEAR</p>
-          <h1>Point Linear issues with your team.</h1>
+          <h1>Point Linear tickets with your team.</h1>
           <p className="landing-summary">
-            Run the session together while each developer reads the issue on
-            their own screen. Everyone votes privately and joins the discussion
-            when the team is ready.
+            Run pointing sessions without sharing your screen. Everyone can read
+            the tickets, vote privately, and save the agreed estimate to Linear.
           </p>
           <div className="landing-primary-action">
             <Link className="button button-primary button-large" href="/app">
@@ -128,33 +127,33 @@ export default function Home() {
         <div>
           <p className="landing-process-label">HOW A SESSION WORKS</p>
           <h2 id="landing-process-title">
-            Read the issue on your own screen. Vote when you’re ready.
+            From your Linear cycle to a pointing session.
           </h2>
           <p>
-            The facilitator moves the queue while teammates review each ticket
-            at their own pace. Reveal votes together, then discuss the estimate.
+            Use your team’s Linear estimate scale. Each person can read ahead
+            while the facilitator keeps the session on the current ticket.
           </p>
         </div>
         <ol className="landing-process-steps">
           <li>
             <span aria-hidden="true">01</span>
             <div>
-              <h3>Bring in the issues</h3>
-              <p>Choose a Linear team. New rooms use that team’s estimate scale.</p>
+              <h3>Choose a team and cycle</h3>
+              <p>Load the unestimated tickets from your selected Linear cycle.</p>
             </div>
           </li>
           <li>
             <span aria-hidden="true">02</span>
             <div>
-              <h3>Vote, then talk</h3>
-              <p>Each developer reads and votes from their own screen.</p>
+              <h3>Review the tickets</h3>
+              <p>Reorder the list or remove tickets before starting.</p>
             </div>
           </li>
           <li>
             <span aria-hidden="true">03</span>
             <div>
-              <h3>Discuss and estimate</h3>
-              <p>Reveal together, settle on an estimate, and keep the session moving.</p>
+              <h3>Invite your team and point</h3>
+              <p>Share the session link, reveal votes, and save the agreed estimate to Linear.</p>
             </div>
           </li>
         </ol>

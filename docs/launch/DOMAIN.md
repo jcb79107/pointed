@@ -11,7 +11,7 @@ After deploying this cutover, the application redirects the old public Vercel ho
 
 ## Cutover and future domain changes
 
-The domain is purchased and HTTPS is serving the app. Before merging/deploying the cutover, register the new Linear OAuth callback and update production `APP_URL` and `LINEAR_REDIRECT_URI`. The existing Vercel origin remains the working sign-in address until those steps are verified.
+On October 13, 2026, the existing production Linear OAuth app was renamed Pointed and its homepage changed to `https://getpointed.app`. The new callback was registered alongside the old callback. Production `APP_URL` and `LINEAR_REDIRECT_URI` were updated for the next deployment. OAuth scopes and credentials are unchanged. The following checklist also applies to future domain changes.
 
 1. Add the chosen domain to the existing Vercel project. Use the DNS records Vercel actually returns; verify ownership and HTTPS.
 2. Add the new `/api/auth/linear/callback` URL to the Linear OAuth application before changing the app. Keep the old callback during transition. If Slack is enabled, update its OAuth redirect configuration too.

@@ -8638,9 +8638,9 @@ h3,
 .browse-notice button { display: block; min-height: 40px; text-decoration: underline; }
 .vote-disagreement { margin: 0 0 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
 .summary-item { border-bottom: 1px solid var(--line); }
-.summary-item > a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
-.summary-item > a > div { display: flex; flex-direction: column; gap: 5px; }
-.summary-item > a em { font-size: 12px; font-style: normal; }
+.summary-item > .summary-ticket { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
+.summary-item > .summary-ticket > div { display: flex; flex-direction: column; gap: 5px; }
+.summary-item > .summary-ticket em { font-size: 12px; font-style: normal; }
 .summary-item > button { min-height: 44px; margin-bottom: 8px; text-decoration: underline; font-size: 13px; }
 @media (max-width: 1180px) {
   .mobile-agenda-nav { display: block; overflow: hidden; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); flex: 0 0 auto; }
@@ -8664,7 +8664,7 @@ h3,
   .mobile-revealed-votes strong { font-size: 15px; }
   .facilitator-view .vote-dock:has(.mobile-revealed-votes) .facilitator-wait { display: none; }
   .vote-disagreement { font-size: 12px; margin-bottom: 4px; }
-  .summary-item > a { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .summary-item > .summary-ticket { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 
 .fixture-banner { padding: 6px 16px; font-size: 12px; background: #fff3cd; color: #332600; }
