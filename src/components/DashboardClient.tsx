@@ -215,7 +215,6 @@ export function DashboardClient({
             <div className="empty-sessions">
               <CircleDot size={24} />
               <b>No pointing sessions yet</b>
-              <p>Choose a team above to get started.</p>
               <button
                 className="button button-ghost"
                 onClick={() => {
