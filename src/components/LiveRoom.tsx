@@ -165,7 +165,13 @@ export function LiveRoom({
   demoMode = false,
 }: LiveRoomProps) {
   const router = useRouter();
-  const [snapshot, setSnapshot] = useState(initialSnapshot);
+  const [roomSnapshot, setSnapshot] = useState(initialSnapshot);
+  // Demo role navigation changes the viewer, not the simulated session.
+  const snapshot = demoMode ? {
+    ...roomSnapshot,
+    currentUserId: initialSnapshot.currentUserId,
+    currentUserRole: initialSnapshot.currentUserRole,
+  } : roomSnapshot;
   const [busy, setBusy] = useState(false);
   const [browsingId, setBrowsingId] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<SessionSnapshot["queue"][number] | null>(null);
@@ -455,7 +461,7 @@ export function LiveRoom({
     setError(null);
     if (demoMode) {
       setSnapshot((current) =>
-        localVote(current, current.currentUserId, value),
+        localVote(current, snapshot.currentUserId, value),
       );
       return;
     }
@@ -1590,6 +1596,12 @@ export function LiveRoom({
                       ))}
                     </div>
                     {demoMode && !isFacilitator && !revealed && <button className="text-action" disabled={!me?.hasVoted || browsing} onClick={() => demoAction("reveal", {})} type="button">Show team votes</button>}
+                    {demoMode && !isFacilitator && revealed && (
+                      <div className="demo-next-step">
+                        <p>In a real session, your facilitator saves the agreed estimate. Try that step here with {suggestedFinalEstimate} points.</p>
+                        <button className="button button-primary" disabled={browsing || suggestedFinalEstimate === null} onClick={() => demoAction("finalize", { estimate: suggestedFinalEstimate })} type="button">Simulate save &amp; next</button>
+                      </div>
+                    )}
                   </div>
                 ) : isFacilitator ? (
                   eligibleVoterCount === 0 && !revealed ? (
@@ -1981,9 +1993,10 @@ function SessionSummary({
           {copied ? "Copied" : "Copy summary"}
         </button>
         <Link className="button button-dark" href="/sessions">
-          Back to sessions
+          {demoMode ? "Create your first session" : "Back to sessions"}
         </Link>
       </div>
+      {demoMode && <p>This was a practice session. Connect Linear to bring your own tickets and invite your team.</p>}
     </div>
   );
 }
