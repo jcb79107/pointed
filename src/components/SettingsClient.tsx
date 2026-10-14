@@ -149,26 +149,19 @@ export function SettingsClient({
       <header className="app-header settings-header">
         <Brand />
         <div className="settings-header-actions">
-          <Link className="button button-ghost" aria-label="Sessions" href="/app">
+          <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions
           </Link>
-          <button
-            className="button button-primary"
-            disabled={saving || !dirty || !teamId}
-            onClick={save}
-            type="button"
-          >
-            {saving ? "Saving…" : "Save team defaults"}
-          </button>
+
         </div>
       </header>
       <section className="settings-main">
         <div className="settings-intro">
           <div>
             <p className="step-label">TEAM WORKFLOW</p>
-            <h1>Pointing defaults</h1>
+            <h1>Settings</h1>
             <p>
-              Set up the next session once. Your team can reuse these defaults.
+              Manage your Linear connection, team defaults, and appearance.
             </p>
           </div>
         </div>
@@ -215,7 +208,7 @@ export function SettingsClient({
                 </p>
                 <a
                   className="button button-ghost"
-                  href="/api/auth/linear/start?write=true&returnTo=/app/settings"
+                  href="/api/auth/linear/start?write=true&returnTo=/settings"
                 >
                   {hasWriteScope
                     ? "Switch Linear workspace"
@@ -273,6 +266,14 @@ export function SettingsClient({
                       .map((card) => card.label)
                       .join(" · ")}
                   </p>
+          <button
+            className="button button-primary"
+            disabled={saving || !dirty || !teamId}
+            onClick={save}
+            type="button"
+          >
+            {saving ? "Saving…" : "Save team defaults"}
+          </button>
                   <p className="theme-save-note">
                     Save team defaults to apply these choices to new sessions.
                   </p>

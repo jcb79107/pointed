@@ -241,18 +241,10 @@ export function QueueBuilder({
       <header className="app-header">
         <Brand />
         <div className="prepare-header-actions">
-          <Link className="button button-ghost" aria-label="Sessions" href="/app">
+          <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions
           </Link>
-          <button
-            className="button button-primary"
-            disabled={Boolean(busy) || !queue.length || Boolean(sourceChanged)}
-            onClick={start}
-            type="button"
-          >
-            {busy === "starting" ? "Starting…" : "Start session"}
-            <ArrowRight size={16} />
-          </button>
+
         </div>
       </header>
       <section className="prepare-main cycle-prepare">
@@ -268,6 +260,7 @@ export function QueueBuilder({
         </div>
         <section className="cycle-source-card" aria-label="Session preparation">
           <TeamDefaultFields
+            session
             value={options}
             onChange={setOptions}
             disabled={Boolean(busy)}
@@ -289,7 +282,7 @@ export function QueueBuilder({
                   ? "Reload agenda"
                   : "Load agenda"}
             </button>
-            <Link href="/app/settings">Edit team defaults</Link>
+            <Link href="/settings">Edit team defaults</Link>
           </div>
           {snapshot.intake && (
             <div className="cycle-resolved">
@@ -431,6 +424,17 @@ export function QueueBuilder({
             code={snapshot.code}
           />
           <button
+            className="button button-primary"
+            disabled={Boolean(busy) || !queue.length || Boolean(sourceChanged)}
+            onClick={start}
+            type="button"
+          >
+            {busy === "starting" ? "Starting…" : "Start session"}
+            <ArrowRight size={16} />
+          </button>
+        </div>
+        <div className="draft-management">
+          <button
             className="button button-ghost"
             disabled={Boolean(busy)}
             onClick={() => setConfirm("delete")}
@@ -475,7 +479,7 @@ export function QueueBuilder({
         onConfirm={() =>
           void run("delete", async () => {
             await request("", "DELETE");
-            router.push("/app");
+            router.push("/sessions");
           })
         }
       />

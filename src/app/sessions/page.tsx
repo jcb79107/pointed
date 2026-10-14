@@ -70,7 +70,7 @@ export default async function AppHome({
     );
   }
 
-  if (destination !== "/app") redirect(destination);
+  if (destination !== "/sessions") redirect(destination);
 
   const [teams, sessions, settings] = await Promise.all([
     listLinearTeams(user.id),

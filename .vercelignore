@@ -9,3 +9,6 @@ coverage
 *.tsbuildinfo
 .agents
 docs
+output
+.playwright-cli
+skills-lock.json

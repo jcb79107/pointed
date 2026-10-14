@@ -8,7 +8,7 @@ import { saveSlackConnection, slackOAuthConfigured } from "@/lib/slack-connectio
 
 export async function GET(request: Request) {
   const { APP_URL } = getServerEnv();
-  const finish = (status: string) => NextResponse.redirect(new URL(`/app/settings?slack=${status}#slack`, APP_URL));
+  const finish = (status: string) => NextResponse.redirect(new URL(`/settings?slack=${status}#slack`, APP_URL));
   const jar = await cookies();
   const expected = jar.get("slack_oauth_state")?.value;
   const owner = jar.get("slack_oauth_user")?.value;

@@ -201,3 +201,48 @@ test('demo timer starts fresh on every visit and on the next ticket', async ({ p
   await expect(page.locator('.summary-list')).toBeVisible();
   await expect(page.locator('.summary-list a')).toHaveCount(0);
 });
+
+test('demo role switching preserves votes, progress, and results through browser history', async ({ page }) => {
+  await page.goto('/demo?role=voter');
+  const vote = page.getByRole('button', { name: '2 points, shortcut 2', exact: true });
+  await vote.click();
+  await page.getByRole('link', { name: 'Facilitator', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Reveal early' })).toBeVisible();
+  await page.goBack();
+  await expect(vote).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('link', { name: 'Facilitator', exact: true }).click();
+  await page.getByRole('button', { name: 'Reveal early' }).click();
+  await page.locator('.final-values').getByRole('button', { name: '2', exact: true }).click();
+  await page.getByRole('button', { name: 'Save estimate & next' }).click();
+  await page.getByRole('link', { name: 'Participant', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Facilitator', exact: true }).click();
+  await page.getByRole('button', { name: 'Finish for now' }).click();
+  await page.getByRole('link', { name: 'Participant', exact: true }).click();
+  await expect(page.locator('.session-summary')).toContainText('1 estimated');
+  await expect(page.locator('.summary-ticket').first()).toContainText('2');
+  await expect(page.getByRole('link', { name: 'Create your first session' })).toHaveAttribute('href', '/sessions');
+});
+
+test('participant can finish the simulated queue and start a real session', async ({ page }, testInfo) => {
+  const apiRequests: string[] = [];
+  page.on('request', request => { if (request.url().includes('/api/')) apiRequests.push(request.url()); });
+  await page.goto('/demo?role=voter');
+  for (const title of ['Retry failed webhook deliveries', 'Add workspace usage limits', 'Audit log CSV export']) {
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '2 points, shortcut 2', exact: true }).click();
+    await page.getByRole('button', { name: 'Show team votes', exact: true }).click();
+    await expect(page.getByText('In a real session, your facilitator saves', { exact: false })).toBeVisible();
+    const next = page.getByRole('button', { name: 'Simulate save & next' });
+    await next.focus();
+    await page.keyboard.press('Enter');
+  }
+  await expect(page.locator('.session-summary')).toContainText('3 estimated');
+  await expect(page.locator('.session-summary')).toContainText('0 remaining');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('demo-completed.png'), fullPage: true });
+  expect(apiRequests).toEqual([]);
+  await page.getByRole('link', { name: 'Create your first session' }).click();
+  await expect(page).toHaveURL(/\/sessions$/);
+  await expect(page.getByRole('link', { name: 'Continue with Linear' })).toBeVisible();
+});

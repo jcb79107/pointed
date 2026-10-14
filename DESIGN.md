@@ -152,3 +152,12 @@ current ticket and disable voting until the active issue is back in view. Explic
 Move up/down controls supplement drag-and-drop at every width.
 
 UX-CONTRACT.md defines the interaction owners and verification paths.
+
+## October 2026 audit refinements
+
+Preparation leads with Cycle; optional voting and initial-order controls share
+TeamDefaultFields inside a native Session options disclosure. Invitations and
+Start session are grouped after the agenda. Destructive draft management is separate.
+Mobile team visibility uses a labeled disclosure, never silent removal of the roster.
+Completed rooms retain history without editable roles or pending-vote indicators.
+The landing illustration follows the dark marketing surface; app themes remain unchanged.
