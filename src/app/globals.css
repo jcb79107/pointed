@@ -8635,7 +8635,9 @@ h3,
 .demo-notice nav a { min-height: 36px; display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
 .demo-notice nav a[aria-current="page"] { background: var(--surface-2); border-color: var(--blue); }
 .browse-notice { flex: 0 0 auto; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink); background: var(--surface-2); font-size: 13px; }
-.browse-notice button { display: block; min-height: 40px; text-decoration: underline; }
+.browse-actions { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin-top: 8px; }
+.browse-actions button { min-height: 44px; }
+.browse-actions button:not(.button) { text-decoration: underline; }
 .vote-disagreement { margin: 0 0 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
 .summary-item { border-bottom: 1px solid var(--line); }
 .summary-item > .summary-ticket { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
