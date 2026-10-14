@@ -149,7 +149,7 @@ export function SettingsClient({
       <header className="app-header settings-header">
         <Brand />
         <div className="settings-header-actions">
-          <Link className="button button-ghost" aria-label="Sessions" href="/app">
+          <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions
           </Link>
           <button
@@ -215,7 +215,7 @@ export function SettingsClient({
                 </p>
                 <a
                   className="button button-ghost"
-                  href="/api/auth/linear/start?write=true&returnTo=/app/settings"
+                  href="/api/auth/linear/start?write=true&returnTo=/settings"
                 >
                   {hasWriteScope
                     ? "Switch Linear workspace"

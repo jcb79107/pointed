@@ -11,27 +11,40 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
   const form = useRef<HTMLFormElement>(null);
   const titleId = useId();
   const noticeId = useId();
+  const recordingRequest = useRef<AbortController | null>(null);
+  const [startingRecording, setStartingRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [screenshot, setScreenshot] = useState<File>();
   const [recording, setRecording] = useState(false);
   const [includeReplay, setIncludeReplay] = useState(false);
-  useEffect(() => () => { void discardFeedbackRecording(); }, []);
+  useEffect(() => () => { recordingRequest.current?.abort(); void discardFeedbackRecording(); }, []);
   async function cancel() {
+    recordingRequest.current?.abort();
+    setStartingRecording(false);
     await discardFeedbackRecording();
     setRecording(false);
     setIncludeReplay(false);
     dialog.current?.close();
   }
-  function record() {
+  async function record() {
+    if (startingRecording) return;
+    const request = new AbortController();
+    recordingRequest.current = request;
+    setStartingRecording(true);
     try {
-      startFeedbackRecording();
+      await startFeedbackRecording(request.signal);
+      if (request.signal.aborted) return;
       setRecording(true);
       setIncludeReplay(true);
       setError("");
       dialog.current?.close();
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "Recording is unavailable."); }
+    } catch (caught) {
+      if (!request.signal.aborted) setError(caught instanceof Error ? caught.message : "Recording is unavailable.");
+    } finally {
+      if (recordingRequest.current === request) setStartingRecording(false);
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -74,9 +87,9 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
         {screenshot && <button className="button button-secondary" type="button" onClick={() => { setScreenshot(undefined); const input = form.current?.elements.namedItem("screenshot") as HTMLInputElement; if (input) input.value = ""; }}>Remove screenshot</button>}
         <p id={noticeId}>Sending shares your message, optional email, and any screenshot you attach with the maintainer through Sentry. Review screenshots for private information. <Link href="/privacy" target="_blank">Privacy</Link></p>
         <p>Replay is off by default. You can start a recording, reproduce the problem, then reopen feedback to attach up to the last minute. Text is masked; forms and sensitive content are blocked. Nothing is uploaded until you send it.</p>
-        {recording ? <label className="feedback-replay-choice"><input type="checkbox" checked={includeReplay} onChange={event => setIncludeReplay(event.target.checked)} />Attach my recording</label> : <button type="button" className="button button-secondary" onClick={record}>Start recording to reproduce a problem</button>}
+        {recording ? <label className="feedback-replay-choice"><input type="checkbox" checked={includeReplay} onChange={event => setIncludeReplay(event.target.checked)} />Attach my recording</label> : <button type="button" className="button button-secondary" disabled={startingRecording} onClick={() => void record()}>{startingRecording ? "Loading recorder…" : "Start recording to reproduce a problem"}</button>}
         {error && <p role="alert">{error} <Link href="/support" target="_blank">Help</Link></p>}
-        <div className="feedback-actions"><button type="button" className="button button-secondary" disabled={busy} onClick={() => void cancel()}>Cancel</button><button type="submit" className="button button-primary" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</button></div>
+        <div className="feedback-actions"><button type="button" className="button button-secondary" disabled={busy} onClick={() => void cancel()}>Cancel</button><button type="submit" className="button button-primary" disabled={busy || startingRecording}>{busy ? "Sending…" : "Send feedback"}</button></div>
       </form>
     </dialog>
   </span>;

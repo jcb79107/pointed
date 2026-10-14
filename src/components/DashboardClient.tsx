@@ -88,7 +88,7 @@ export function DashboardClient({
         }
         throw new Error(result.error ?? "Could not create session");
       }
-      router.push(`/app/sessions/${result.session.id}/prepare`);
+      router.push(`/sessions/${result.session.id}/prepare`);
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Could not create session",
@@ -108,7 +108,7 @@ export function DashboardClient({
             <b>{user.name}</b>
             <small>Linear connected</small>
           </div>
-          <Link aria-label="Settings" className="header-icon-link" href="/app/settings">
+          <Link aria-label="Settings" className="header-icon-link" href="/settings">
             <Settings size={16} />
           </Link>
           <form noValidate action="/api/auth/logout" method="post">
@@ -231,7 +231,7 @@ export function DashboardClient({
               {initialSessions.map((session) => {
                 const destination =
                   session.status === "draft"
-                    ? `/app/sessions/${session.id}/prepare`
+                    ? `/sessions/${session.id}/prepare`
                     : `/sessions/${session.id}`;
                 return (
                   <Link

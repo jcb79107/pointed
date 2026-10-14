@@ -241,7 +241,7 @@ export function QueueBuilder({
       <header className="app-header">
         <Brand />
         <div className="prepare-header-actions">
-          <Link className="button button-ghost" aria-label="Sessions" href="/app">
+          <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions
           </Link>
           <button
@@ -289,7 +289,7 @@ export function QueueBuilder({
                   ? "Reload agenda"
                   : "Load agenda"}
             </button>
-            <Link href="/app/settings">Edit team defaults</Link>
+            <Link href="/settings">Edit team defaults</Link>
           </div>
           {snapshot.intake && (
             <div className="cycle-resolved">
@@ -475,7 +475,7 @@ export function QueueBuilder({
         onConfirm={() =>
           void run("delete", async () => {
             await request("", "DELETE");
-            router.push("/app");
+            router.push("/sessions");
           })
         }
       />

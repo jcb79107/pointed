@@ -39,7 +39,7 @@ export function SlackInviteButton({ sessionId, title, teamName, issueCount, code
   }
   return <div className="slack-invite-control">
     <button ref={triggerRef} className="button button-ghost" aria-label="Send to Slack" title="Send to Slack" type="button" disabled={busy} onClick={() => void preview()}><Send size={15} />{busy ? "Working…" : "Send to Slack"}</button>
-    {needsConnection && <span role="status"><Link href="/app/settings#slack">Connect a Slack channel in Settings</Link>, or use Copy invite.</span>}
+    {needsConnection && <span role="status"><Link href="/settings#slack">Connect a Slack channel in Settings</Link>, or use Copy invite.</span>}
     {message && <span role="status">{message}</span>}
     {error && !open && <span role="alert">{error}</span>}
     <ConfirmDialog returnFocusRef={triggerRef} error={error} variant="primary" open={open} busy={busy} title="Send session invite?"

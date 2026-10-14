@@ -37,6 +37,13 @@ export default defineConfig({
           {
             command: process.env.UI_TEST_PRODUCTION ? "npm run start -- --port 3002" : "npm run dev -- --webpack --port 3002",
             url: "http://localhost:3002/demo",
+            // Signed-out routing tests need a configured app, never a real DB.
+            env: {
+              DATABASE_URL: "postgresql://test:test@127.0.0.1:5432/pointed_test",
+              AUTH_DATABASE_URL: "postgresql://test:test@127.0.0.1:5432/pointed_test",
+              LINEAR_CLIENT_ID: "ui-test-client",
+              TOKEN_ENCRYPTION_KEY: "ui-test-only-not-a-production-key",
+            },
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },

@@ -9,7 +9,7 @@ import { GET } from "./route";
 beforeEach(() => { vi.clearAllMocks(); mocks.user.mockResolvedValue({ id: "current-user" }); mocks.configured.mockReturnValue(true); vi.stubEnv("SLACK_CLIENT_ID", "test-client"); });
 afterEach(() => vi.unstubAllEnvs());
 it("sends signed-out users to sign in without creating authorization cookies", async () => {
-  mocks.user.mockResolvedValue(null); expect((await GET()).headers.get("location")).toBe("https://pointed.test/app"); expect(mocks.set).not.toHaveBeenCalled();
+  mocks.user.mockResolvedValue(null); expect((await GET()).headers.get("location")).toBe("https://pointed.test/sessions"); expect(mocks.set).not.toHaveBeenCalled();
 });
 it("provides the webhook fallback when OAuth is not configured", async () => {
   mocks.configured.mockReturnValue(false); expect((await GET()).headers.get("location")).toContain("slack=unavailable#slack"); expect(mocks.set).not.toHaveBeenCalled();

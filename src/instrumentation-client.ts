@@ -17,22 +17,9 @@ Sentry.init({
   beforeSendLog: () => null,
   beforeSendMetric: () => null,
   beforeSend: sanitizeSentryEvent,
-  integrations: (defaults) => [
-    ...defaults.filter((integration) => !["Breadcrumbs", "BrowserSession", "HttpContext"].includes(integration.name)),
-    Sentry.replayIntegration({
-      maskAllText: true,
-      block: ["form", "input", "textarea", "select", "[contenteditable]", "[data-sensitive]", "[data-sentry-block]", ".issue-description", ".issue-tags", ".room-title", ".participant-list"],
-      maskAllInputs: true,
-      blockAllMedia: true,
-      stickySession: false,
-      minReplayDuration: 0,
-      networkDetailAllowUrls: [],
-      networkCaptureBodies: false,
-      beforeErrorSampling: () => false,
-      // Keep the visual interaction recording, not console or network payloads.
-      beforeAddRecordingEvent: () => null,
-    }),
-  ],
+  integrations: (defaults) => defaults.filter(
+    (integration) => !["Breadcrumbs", "BrowserSession", "HttpContext"].includes(integration.name),
+  ),
 });
 // Feedback has its own event type and does not pass through beforeSend.
 Sentry.addEventProcessor((event, hint) => sanitizeSentryEvent({

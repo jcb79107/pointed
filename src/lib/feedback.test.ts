@@ -4,8 +4,7 @@ const sdk = vi.hoisted(() => ({
   listener: undefined as undefined | ((event: { contexts: { feedback: Record<string, unknown> } }) => void),
 }));
 vi.mock("@sentry/nextjs", () => ({
-  getClient: () => ({ getDsn: () => ({}), on: (_: string, listener: typeof sdk.listener) => { sdk.listener = listener; return sdk.off; } }),
-  getReplay: () => ({ getReplayId: () => "a".repeat(32), flush: sdk.flush, stop: sdk.stop, startBuffering: sdk.startBuffering }),
+  getClient: () => ({ getDsn: () => ({}), getIntegrationByName: () => ({ getReplayId: () => "a".repeat(32), flush: sdk.flush, stop: sdk.stop, startBuffering: sdk.startBuffering }), on: (_: string, listener: typeof sdk.listener) => { sdk.listener = listener; return sdk.off; } }),
   sendFeedback: sdk.sendFeedback,
 }));
 import { sendPointedFeedback, startFeedbackRecording, discardFeedbackRecording } from "./feedback";
@@ -13,11 +12,17 @@ import { sendPointedFeedback, startFeedbackRecording, discardFeedbackRecording }
 describe("feedback submission", () => {
   beforeEach(() => { vi.clearAllMocks(); sdk.flush.mockResolvedValue(undefined); sdk.stop.mockResolvedValue(undefined); sdk.sendFeedback.mockResolvedValue("event"); });
   it("starts only on request and discards without uploading", async () => {
-    startFeedbackRecording();
+    await startFeedbackRecording();
     expect(sdk.startBuffering).toHaveBeenCalledOnce();
     await discardFeedbackRecording();
     expect(sdk.stop).toHaveBeenCalledWith({flush:false});
     expect(sdk.flush).not.toHaveBeenCalled();
+  });
+  it("does not start when consent was canceled", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await startFeedbackRecording(controller.signal);
+    expect(sdk.startBuffering).not.toHaveBeenCalled();
   });
   it("uploads an explicitly attached buffer, links it, and stops recording", async () => {
     expect(sdk.flush).not.toHaveBeenCalled();

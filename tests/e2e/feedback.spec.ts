@@ -66,3 +66,32 @@ test('recording requires opt-in and can be excluded from a feedback submission',
   expect(envelopes.some(body => body.includes('replay_recording'))).toBe(true);
   await expect(page.getByText('Recording locally')).toHaveCount(0);
 });
+
+test('canceling a delayed recorder load never starts recording', async ({ page }) => {
+  test.skip(!process.env.FEEDBACK_RECORDING_TEST, 'Requires the isolated test Sentry DSN');
+  await page.goto('/demo');
+  const trigger = page.getByRole('button', { name: 'Send feedback', exact: true });
+  await trigger.click();
+  const dialog = page.getByRole('dialog');
+  // Hold only scripts requested after the initial page has hydrated.
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/_next/static/chunks/*.js', async route => {
+    await gate;
+    await route.continue();
+  });
+  const loaded = page.waitForResponse(response => response.url().includes('/_next/static/chunks/') && response.url().endsWith('.js'));
+  await dialog.getByRole('button', { name: 'Start recording to reproduce a problem' }).click();
+  await expect(dialog.getByRole('button', { name: 'Loading recorder…' })).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  release();
+  await loaded;
+  await expect(dialog).not.toBeVisible();
+  await trigger.click();
+  await expect(dialog.getByRole('button', { name: 'Start recording to reproduce a problem' })).toBeEnabled();
+  await expect(page.getByText('Recording locally')).toHaveCount(0);
+  // A subsequent explicit opt-in still works after the canceled load.
+  await dialog.getByRole('button', { name: 'Start recording to reproduce a problem' }).click();
+  await expect(page.getByText('Recording locally')).toBeVisible();
+  await page.getByRole('button', { name: 'Discard recording' }).click();
+});

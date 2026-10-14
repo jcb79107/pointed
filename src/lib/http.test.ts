@@ -4,10 +4,20 @@ import { safeReturnTo } from "@/lib/http";
 describe("OAuth return destination", () => {
   it("preserves local invite and preparation paths", () => {
     expect(safeReturnTo("/s/ROOM123")).toBe("/s/ROOM123");
-    expect(safeReturnTo("/app/sessions/id/prepare?from=invite")).toBe("/app/sessions/id/prepare?from=invite");
+    expect(safeReturnTo("/sessions/id/prepare?from=invite")).toBe("/sessions/id/prepare?from=invite");
+  });
+  it.each([
+    ["/app", "/sessions"],
+    ["/app?authError=expired", "/sessions?authError=expired"],
+    ["/app/settings#slack", "/settings#slack"],
+    ["/app/account", "/account"],
+    ["/app/sessions/id/prepare?from=invite", "/sessions/id/prepare?from=invite"],
+    ["/application", "/application"],
+  ])("normalizes legacy return destination %s", (before, after) => {
+    expect(safeReturnTo(before)).toBe(after);
   });
   it.each([null, "https://example.com", "//example.com", "/\\example.com", "/\n/example.com", "/\t/example.com"])("rejects external or normalized external paths: %s", (path) => {
-    expect(safeReturnTo(path)).toBe("/app");
+    expect(safeReturnTo(path)).toBe("/sessions");
   });
 });
 

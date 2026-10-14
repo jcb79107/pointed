@@ -254,7 +254,11 @@ export function LiveRoom({
 
   useEffect(() => {
     if (demoMode) return;
-    const timer = window.setInterval(() => void refresh(), 5_000);
+    const timer = window.setInterval(() => {
+      // Keep the fallback for active viewers, without polling an idle/offline tab.
+      // Visibility/online events below refresh immediately when the user returns.
+      if (document.visibilityState === "visible" && navigator.onLine) void refresh();
+    }, 5_000);
     const recover = () => {
       setSyncState(navigator.onLine ? "reconnecting" : "offline");
       if (navigator.onLine) void refresh();
@@ -872,7 +876,7 @@ export function LiveRoom({
         throw new Error(data.error ?? "Could not delete this session");
       }
       setConfirmTarget(null);
-      router.push("/app");
+      router.push("/sessions");
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -1048,7 +1052,7 @@ export function LiveRoom({
       <header className="room-header">
         <div className="room-title">
           <Brand compact />
-          <Link aria-label="Back to sessions" href="/app">
+          <Link aria-label="Back to sessions" href="/sessions">
             <ArrowLeft size={15} />
           </Link>
           <div>
@@ -1614,7 +1618,7 @@ export function LiveRoom({
               isFacilitator={isFacilitator}
               participantCount={snapshot.participants.length}
               participants={snapshot.participants}
-              prepareHref={`/app/sessions/${snapshot.id}/prepare`}
+              prepareHref={`/sessions/${snapshot.id}/prepare`}
               ticketCount={snapshot.queue.length}
               title={snapshot.title}
             />
@@ -1976,7 +1980,7 @@ function SessionSummary({
           {copied ? <Check size={15} /> : <Copy size={15} />}
           {copied ? "Copied" : "Copy summary"}
         </button>
-        <Link className="button button-dark" href="/app">
+        <Link className="button button-dark" href="/sessions">
           Back to sessions
         </Link>
       </div>

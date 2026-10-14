@@ -35,7 +35,7 @@ describe("Sentry privacy boundary", () => {
     expect(sanitizeSentryEvent({ type: "replay_event" })?.type).toBe("replay_event");
     expect(privateDataCollection).toMatchObject({ userInfo: false, httpBodies: [], cookies: false, stackFrameVariables: false });
   });
-  it.each([["/s/secret", "/s/[code]"], ["/app/sessions/secret/prepare?token=secret", "/app/sessions/[id]/prepare"], ["/api/auth/linear/callback?code=secret", "/api/[route]"], ["/unknown/secret", "/[page]"]])("normalizes %s", (url, expected) => {
+  it.each([["/s/secret", "/s/[code]"], ["/sessions/secret/prepare?token=secret", "/sessions/[id]/prepare"], ["/api/auth/linear/callback?code=secret", "/api/[route]"], ["/unknown/secret", "/[page]"]])("normalizes %s", (url, expected) => {
     expect(telemetryPage(url)).toBe(expected);
   });
 });
