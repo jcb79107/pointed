@@ -8,6 +8,7 @@ test('feedback explains attachments, preserves drafts, and sends nothing on canc
   const trigger = page.getByRole('button', { name: 'Send feedback', exact: true });
   await trigger.click();
   const dialog = page.getByRole('dialog');
+  await dialog.getByText('Add details (optional)', { exact: true }).click();
   await expect(dialog).toContainText('up to the last minute');
   await expect(dialog).toContainText('Replay is off by default');
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).focus();
@@ -43,6 +44,7 @@ test('recording requires opt-in and can be excluded from a feedback submission',
   const trigger = page.getByRole('button', { name: 'Send feedback', exact: true });
   await trigger.click();
   const dialog = page.getByRole('dialog');
+  await dialog.getByText('Add details (optional)', { exact: true }).click();
   await expect(dialog.getByLabel('Attach my recording')).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Start recording to reproduce a problem' }).click();
   await expect(dialog).not.toBeVisible();
@@ -73,6 +75,7 @@ test('canceling a delayed recorder load never starts recording', async ({ page }
   const trigger = page.getByRole('button', { name: 'Send feedback', exact: true });
   await trigger.click();
   const dialog = page.getByRole('dialog');
+  await dialog.getByText('Add details (optional)', { exact: true }).click();
   // Hold only scripts requested after the initial page has hydrated.
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
@@ -94,4 +97,17 @@ test('canceling a delayed recorder load never starts recording', async ({ page }
   await dialog.getByRole('button', { name: 'Start recording to reproduce a problem' }).click();
   await expect(page.getByText('Recording locally')).toBeVisible();
   await page.getByRole('button', { name: 'Discard recording' }).click();
+});
+
+ test('invalid optional email remains recoverable when details are collapsed', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Send feedback', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('What happened, or what would you change?').fill('Synthetic feedback');
+  await dialog.getByText('Add details (optional)', { exact: true }).click();
+  await dialog.getByLabel('Email (optional, for a reply)').fill('invalid');
+  await dialog.getByText('Add details (optional)', { exact: true }).click();
+  await dialog.getByRole('button', { name: 'Send feedback', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('Enter a valid email');
+  await expect(dialog.getByLabel('What happened, or what would you change?')).toHaveValue('Synthetic feedback');
 });

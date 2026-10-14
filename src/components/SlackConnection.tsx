@@ -50,11 +50,11 @@ export function SlackConnection({ notice }: { notice?: string }) {
     {loaded && <>
       <p>{destination ? <>Connected to <strong>{destination.workspaceName} · {destination.channelName}</strong>{destination.source === "manual" && " (names supplied during webhook setup)"}.</> : "No Slack channel connected. Copying invite links still works."}</p>
       <div className="slack-settings-actions">
-        {oauthAvailable ? <a className="button button-primary" href="/api/auth/slack/start">{destination ? "Change Slack channel" : "Connect Slack"}</a> : <p>Slack sign-in is not enabled on this deployment yet. You can connect an incoming webhook below.</p>}
+        {oauthAvailable ? <a className="button button-primary" href="/api/auth/slack/start">{destination ? "Change Slack channel" : "Connect Slack"}</a> : <p>Copy a session invite link to share it in Slack, or use the advanced connection below.</p>}
         {destination && <button className="button button-ghost" type="button" disabled={busy} onClick={() => void update("DELETE")}>Disconnect</button>}
       </div>
       {oauthAvailable && <p className="settings-help">Slack will ask you to choose a workspace and channel. Your workspace may require administrator approval. Connecting does not send a message.</p>}
-      <details className="slack-manual-setup"><summary>Use an incoming webhook</summary>
+      <details className="slack-manual-setup"><summary>Advanced Slack connection</summary>
         <p>Use this if Slack sign-in is unavailable. Create a webhook for your chosen channel in Slack, then save it here. Replacing the connection affects only your future sends.</p>
         <form noValidate onSubmit={(event) => { event.preventDefault(); void update("PUT"); }}>
           <label className="settings-field">Slack workspace<input required maxLength={80} value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} placeholder="Your workspace name" /></label>

@@ -17,3 +17,8 @@
 | --- | --- | --- | --- | --- |
 | Select/Listbox | Native HTML select; TeamDefaultFields for workflow choices | TeamDefaults schema and DESIGN.md | team defaults, session override, agenda navigation | cycle-preview browser tests and manual popup inspection |
 | Form | Component form handlers plus server Zod schemas | API contracts | create, edit | persistence tests and failure-path browser tests |
+
+- Demo role changes preserve session progress and votes; participant practice can continue through the queue and links to creating a real session.
+- Mobile team disclosure exposes participant names and pending/voted states. Completed sessions expose read-only participant information.
+- Feedback attachments and recording are optional details. Recording instructions and consent precede recording; nothing uploads before Send. Collapsing optional details does not discard inputs.
+- Preparation overrides are labeled Cycle, team defaults Default cycle. Team-default save lives with its section; other settings retain their independent persistence behavior.

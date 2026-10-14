@@ -26,7 +26,7 @@ test('protected clean routes retain their destination through sign-in', async ({
 
 test('landing and sign-in use canonical sessions URL', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: 'Connect Linear' }).click();
+  await page.getByRole('link', { name: 'Start a session' }).click();
   await expect(page).toHaveURL(/\/sessions$/);
   await expect(page.getByRole('heading', { name: 'Sign in with Linear' })).toBeVisible();
   await page.goBack();

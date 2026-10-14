@@ -53,6 +53,11 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
     const data = new FormData(event.currentTarget);
     const message = String(data.get("message") ?? "").trim();
     if (!message) { setError("Tell us what happened or what you’d change."); return; }
+    const emailInput = event.currentTarget.elements.namedItem("email") as HTMLInputElement;
+    if (!emailInput.validity.valid) {
+      setError("Enter a valid email address in Add details, or leave it blank.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -73,9 +78,10 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
     {recording && <span className="feedback-recording" role="status">Recording locally <button type="button" onClick={() => void cancel()}>Discard recording</button></span>}
     {sent && <span className="feedback-fallback" role="status">Thanks — your feedback was sent.</span>}
     <dialog onClose={() => trigger.current?.focus()} ref={dialog} className="feedback-dialog" aria-labelledby={titleId} aria-describedby={noticeId} onCancel={(event) => { event.preventDefault(); if (!busy) void cancel(); }} data-sentry-block>
-      <form ref={form} onSubmit={submit}>
+      <form noValidate ref={form} onSubmit={submit}>
         <h2 id={titleId}>Send feedback</h2>
         <label>What happened, or what would you change?<textarea name="message" required maxLength={5000} rows={5} /></label>
+        <details className="feedback-details"><summary>Add details (optional)</summary>
         <label><span>Email (optional, for a reply)</span><input name="email" type="email" maxLength={254} autoComplete="email" /></label>
         <label><span>Screenshot (optional)</span><input name="screenshot" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => {
           const file = event.target.files?.[0];
@@ -85,9 +91,11 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
           setError(""); setScreenshot(file);
         }} /></label>
         {screenshot && <button className="button button-secondary" type="button" onClick={() => { setScreenshot(undefined); const input = form.current?.elements.namedItem("screenshot") as HTMLInputElement; if (input) input.value = ""; }}>Remove screenshot</button>}
-        <p id={noticeId}>Sending shares your message, optional email, and any screenshot you attach with the maintainer through Sentry. Review screenshots for private information. <Link href="/privacy" target="_blank">Privacy</Link></p>
+
         <p>Replay is off by default. You can start a recording, reproduce the problem, then reopen feedback to attach up to the last minute. Text is masked; forms and sensitive content are blocked. Nothing is uploaded until you send it.</p>
         {recording ? <label className="feedback-replay-choice"><input type="checkbox" checked={includeReplay} onChange={event => setIncludeReplay(event.target.checked)} />Attach my recording</label> : <button type="button" className="button button-secondary" disabled={startingRecording} onClick={() => void record()}>{startingRecording ? "Loading recorder…" : "Start recording to reproduce a problem"}</button>}
+        </details>
+        <p id={noticeId}>Your feedback and attachments go to the maintainer through Sentry. Review attachments for private information. <Link href="/privacy" target="_blank">Privacy</Link></p>
         {error && <p role="alert">{error} <Link href="/support" target="_blank">Help</Link></p>}
         <div className="feedback-actions"><button type="button" className="button button-secondary" disabled={busy} onClick={() => void cancel()}>Cancel</button><button type="submit" className="button button-primary" disabled={busy || startingRecording}>{busy ? "Sending…" : "Send feedback"}</button></div>
       </form>

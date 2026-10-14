@@ -63,3 +63,17 @@ test('header title and actions fit across tablet and desktop breakpoints', async
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.getByRole('button', { name: 'Resume 3 remaining' })).toBeVisible();
 });
+
+test('mobile team disclosure shows waiting voters and hides completed controls', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/demo');
+  const team = page.getByRole('button', { name: /Team · 4/ });
+  await expect(team).toHaveAttribute('aria-expanded', 'false');
+  await team.click();
+  await expect(page.getByRole('img', { name: 'Richard Hendricks: waiting for vote', exact: true })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Role for Jared Dunn' })).toBeVisible();
+  await page.getByRole('button', { name: 'Finish for now', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Role for Jared Dunn' })).toHaveCount(0);
+  await expect(page.getByLabel('Browse agenda')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Resume 3 remaining' })).toBeVisible();
+});

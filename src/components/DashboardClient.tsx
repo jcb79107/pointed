@@ -195,7 +195,7 @@ export function DashboardClient({
                 Cancel
               </button>
               <button
-                className="button button-dark"
+                className="button button-primary"
                 disabled={!title.trim() || !teamId || busy}
                 type="submit"
               >
@@ -251,7 +251,7 @@ export function DashboardClient({
                     <div className="session-info">
                       <b>{session.title}</b>
                       <span>
-                        {session.teamName} · {session.issueCount}{" "}
+                        {session.status === "draft" ? "Draft" : session.status === "live" ? "Live" : "Ended"} · {session.teamName} · {session.issueCount}{" "}
                         {session.issueCount === 1 ? "ticket" : "tickets"}
                       </span>
                     </div>
@@ -263,7 +263,7 @@ export function DashboardClient({
                       }).format(new Date(session.updatedAt))}
                     </div>
                     <span className="session-open">
-                      {session.status === "draft" ? "Prepare" : "Open"}
+                      {session.status === "draft" ? "Prepare" : session.status === "ended" ? "View summary" : "Join session"}
                       <ArrowRight size={15} />
                     </span>
                   </Link>
