@@ -8635,7 +8635,9 @@ h3,
 .demo-notice nav a { min-height: 36px; display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); }
 .demo-notice nav a[aria-current="page"] { background: var(--surface-2); border-color: var(--blue); }
 .browse-notice { flex: 0 0 auto; padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink); background: var(--surface-2); font-size: 13px; }
-.browse-notice button { display: block; min-height: 40px; text-decoration: underline; }
+.browse-actions { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin-top: 8px; }
+.browse-actions button { min-height: 44px; }
+.browse-actions button:not(.button) { text-decoration: underline; }
 .vote-disagreement { margin: 0 0 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
 .summary-item { border-bottom: 1px solid var(--line); }
 .summary-item > .summary-ticket { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
@@ -8720,3 +8722,47 @@ h3,
 
 .feedback-dialog .feedback-replay-choice { display: flex; align-items: center; gap: .65rem; }
 .feedback-dialog input[type="checkbox"] { width: 1.1rem; height: 1.1rem; padding: 0; flex: 0 0 auto; accent-color: var(--blue); }
+
+/* Audit refinements: task-first setup and readable session state. */
+.new-session-panel { grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr); }
+.new-session-panel .panel-intro, .new-session-panel .panel-actions, .new-session-panel .form-error { grid-column: 1 / -1; }
+.new-session-panel .panel-actions { justify-content: flex-end; }
+.cycle-source-card .team-default-fields { grid-template-columns: 1fr; }
+.session-options { border-top: 1px solid var(--hairline); padding-top: 12px; }
+.session-options summary, .feedback-details summary { cursor: pointer; padding: 10px 0; font-weight: 500; }
+.session-options-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding-top: 12px; }
+.cycle-agenda .queue-empty { min-height: 150px; padding: 24px; }
+.cycle-share { align-items: center; }
+.draft-management { margin-top: 24px; border-top: 1px solid var(--hairline); padding-top: 16px; }
+.feedback-details > label, .feedback-details > p { margin: 12px 0; }
+.mobile-team-toggle { display: none; }
+.room-ticket b { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.summary-ticket > div > span { white-space: normal; overflow-wrap: anywhere; }
+@media (min-width: 1025px) {
+  .landing-hero { min-height: 640px; padding: 64px 0; }
+}
+@media (max-width: 700px) {
+  .new-session-panel { grid-template-columns: minmax(0, 1fr); }
+  .session-options-fields { grid-template-columns: 1fr; }
+  .participant-view .room-team { display: flex; flex-direction: column; }
+  .room-team .mobile-team-toggle { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 12px 16px; background: var(--surface-1); border: 0; border-bottom: 1px solid var(--hairline); color: var(--ink); cursor: pointer; text-align: left; }
+  .room-team > .pane-heading, .room-team .participant-list { display: none; }
+  .room-team.team-expanded .participant-list { display: block; flex: none; overflow: visible; }
+  .room-team.team-ended { display: none; }
+}
+.landing-shell .focused-product-demo {
+  --demo-border: #34343a;
+  --demo-muted: #b6bbc5;
+  --demo-soft: #18191a;
+  background: #0f1011;
+  color: #f7f8f8;
+  box-shadow: none;
+}
+.landing-shell .focused-voter { background: #141516; }
+.landing-shell .focused-avatar { background: #23252a; color: #d0d6e0; }
+.landing-shell .focused-voter > strong { background: #242741; border-color: #525b9e; color: #bbc2ff; }
+.landing-shell .focused-issue-meta > span:first-child { color: #a6b0ff; }
+.landing-shell .focused-round-heading b { color: #7ad79a; }
+.landing-shell .landing-facilitator { color: #b6bbc5; }
+.landing-shell .focused-live-status i { box-shadow: none; }
+.landing-shell .focused-live-status { color: #b6bbc5; }

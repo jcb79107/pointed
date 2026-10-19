@@ -46,8 +46,8 @@ export default function Home() {
             the tickets, vote privately, and save the agreed estimate to Linear.
           </p>
           <div className="landing-primary-action">
-            <Link className="button button-primary button-large" href="/app">
-              Connect Linear <ArrowRight size={18} />
+            <Link className="button button-primary button-large" href="/sessions">
+              Start a session <ArrowRight size={18} />
             </Link>
             <Link className="button button-ghost" href="/demo">
               Try the demo

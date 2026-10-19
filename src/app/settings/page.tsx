@@ -18,7 +18,7 @@ const slackNotices: Record<string, string> = {
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ slack?: string }> }) {
   const { slack } = await searchParams;
   const user = await getCurrentUser();
-  if (!user) redirect("/app?returnTo=/app/settings");
+  if (!user) redirect("/sessions?returnTo=/settings");
 
   const [teams, hasWriteScope] = await Promise.all([
     listLinearTeams(user.id),

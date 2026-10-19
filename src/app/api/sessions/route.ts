@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           error: "Linear write permission is required",
-          upgradeUrl: `/api/auth/linear/start?write=true&returnTo=/app`,
+          upgradeUrl: `/api/auth/linear/start?write=true&returnTo=/sessions`,
         },
         { status: 403 },
       );

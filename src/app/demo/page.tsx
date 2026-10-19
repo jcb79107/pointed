@@ -236,5 +236,5 @@ export default async function DemoPage({
           currentUserRole: "voter" as const,
         }
       : roomSnapshot;
-  return <LiveRoom key={`${role}-${state}`} demoMode initialSnapshot={initialSnapshot} />;
+  return <LiveRoom key={state ?? "live"} demoMode initialSnapshot={initialSnapshot} />;
 }

@@ -1,3 +1,4 @@
+import { LiveRoom } from "@/components/LiveRoom";
 import { QueueBuilder } from "@/components/QueueBuilder";
 import { SettingsClient } from "@/components/SettingsClient";
 import { DEFAULT_TEAM_DEFAULTS } from "@/lib/team-defaults";
@@ -32,7 +33,9 @@ export default async function Fixture({
       <aside aria-label="Preview environment" className="fixture-banner">
         Local preview · Synthetic tickets and accounts
       </aside>
-      {screen === "settings" ? (
+      {screen === "live" ? (
+        <LiveRoom initialSnapshot={demoSnapshot} />
+      ) : screen === "settings" ? (
         <SettingsClient
           user={{ name: "Richard Hendricks", email: "richard@example.test" }}
           teams={teams}

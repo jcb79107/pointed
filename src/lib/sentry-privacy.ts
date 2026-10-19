@@ -14,8 +14,8 @@ export function telemetryPage(value: string): string {
   try {
     const path = new URL(value, "https://pointed.invalid").pathname;
     if (path.startsWith("/s/")) return "/s/[code]";
-    if (path.startsWith("/app/sessions/")) return path.endsWith("/prepare") ? "/app/sessions/[id]/prepare" : "/app/sessions/[id]";
-    if (["/", "/demo", "/privacy", "/support", "/app", "/app/settings", "/app/account"].includes(path)) return path;
+    if (path.startsWith("/sessions/")) return path.endsWith("/prepare") ? "/sessions/[id]/prepare" : "/sessions/[id]";
+    if (["/", "/demo", "/privacy", "/support", "/sessions", "/settings", "/account"].includes(path)) return path;
     return path.startsWith("/api/") ? "/api/[route]" : "/[page]";
   } catch { return "/[page]"; }
 }

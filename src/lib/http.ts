@@ -44,8 +44,14 @@ export function safeReturnTo(value: string | null): string {
     value.startsWith("//") ||
     value.includes("\\") ||
     /\s/.test(value)
-  ) return "/app";
-  return value;
+  ) return "/sessions";
+  // Old bookmarks and in-flight OAuth cookies must resolve to the canonical
+  // destination, rather than redirecting back into the legacy /app route.
+  return value
+    .replace(/^\/app\/sessions(?=[/?#]|$)/, "/sessions")
+    .replace(/^\/app\/settings(?=[/?#]|$)/, "/settings")
+    .replace(/^\/app\/account(?=[/?#]|$)/, "/account")
+    .replace(/^\/app(?=[?#]|$)/, "/sessions");
 }
 
 export function assertSameOrigin(request: Request): void {

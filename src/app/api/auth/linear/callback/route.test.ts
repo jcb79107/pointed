@@ -49,7 +49,7 @@ describe("Linear OAuth recovery", () => {
       linear_oauth_return: { value: "//elsewhere.example" },
     })[name]);
     const response = await callback("state=valid&error=access_denied");
-    expect(response.headers.get("location")).toBe("https://pointed.test/app?authError=token_exchange_failed");
+    expect(response.headers.get("location")).toBe("https://pointed.test/sessions?authError=token_exchange_failed");
     expect(fetch).not.toHaveBeenCalled();
   });
 });

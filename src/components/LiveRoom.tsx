@@ -165,7 +165,14 @@ export function LiveRoom({
   demoMode = false,
 }: LiveRoomProps) {
   const router = useRouter();
-  const [snapshot, setSnapshot] = useState(initialSnapshot);
+  const [roomSnapshot, setSnapshot] = useState(initialSnapshot);
+  const [teamExpanded, setTeamExpanded] = useState(false);
+  // Demo role navigation changes the viewer, not the simulated session.
+  const snapshot = demoMode ? {
+    ...roomSnapshot,
+    currentUserId: initialSnapshot.currentUserId,
+    currentUserRole: initialSnapshot.currentUserRole,
+  } : roomSnapshot;
   const [busy, setBusy] = useState(false);
   const [browsingId, setBrowsingId] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<SessionSnapshot["queue"][number] | null>(null);
@@ -254,7 +261,11 @@ export function LiveRoom({
 
   useEffect(() => {
     if (demoMode) return;
-    const timer = window.setInterval(() => void refresh(), 5_000);
+    const timer = window.setInterval(() => {
+      // Keep the fallback for active viewers, without polling an idle/offline tab.
+      // Visibility/online events below refresh immediately when the user returns.
+      if (document.visibilityState === "visible" && navigator.onLine) void refresh();
+    }, 5_000);
     const recover = () => {
       setSyncState(navigator.onLine ? "reconnecting" : "offline");
       if (navigator.onLine) void refresh();
@@ -451,7 +462,7 @@ export function LiveRoom({
     setError(null);
     if (demoMode) {
       setSnapshot((current) =>
-        localVote(current, current.currentUserId, value),
+        localVote(current, snapshot.currentUserId, value),
       );
       return;
     }
@@ -760,8 +771,8 @@ export function LiveRoom({
     overwrite = false,
   ) {
     setError(null);
-    setBrowsingId(null);
     if (demoMode) {
+      setBrowsingId(null);
       demoAction(actionName, payload);
       if (["activate", "finalize", "skip", "finish"].includes(actionName)) {
         setFinalEstimate(null);
@@ -791,6 +802,7 @@ export function LiveRoom({
         if (!response.ok) {
           throw new Error(data.error ?? "Could not update the session");
         }
+        setBrowsingId(null);
         if (data.snapshot) {
           if (data.snapshot.activeItemId !== snapshot.activeItemId) {
             setFinalEstimate(null);
@@ -872,7 +884,7 @@ export function LiveRoom({
         throw new Error(data.error ?? "Could not delete this session");
       }
       setConfirmTarget(null);
-      router.push("/app");
+      router.push("/sessions");
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -1014,13 +1026,14 @@ export function LiveRoom({
       }
       return;
     }
-    if (isFacilitator && key === "r" && !revealed && !busy) {
+    if (isFacilitator && !browsing && key === "r" && !revealed && !busy) {
       event.preventDefault();
       void action("reveal");
       return;
     }
     if (
       isFacilitator &&
+      !browsing &&
       key === "n" &&
       revealed &&
       selectedFinalEstimate !== null &&
@@ -1048,14 +1061,14 @@ export function LiveRoom({
       <header className="room-header">
         <div className="room-title">
           <Brand compact />
-          <Link aria-label="Back to sessions" href="/app">
+          <Link aria-label="Back to sessions" href="/sessions">
             <ArrowLeft size={15} />
           </Link>
           <div>
             <b>{snapshot.title}</b>
             <span>
-              <i className="live-dot" />
-              {demoMode ? "Demo session" : snapshot.status === "live" ? "Live session" : snapshot.status}
+              {snapshot.status === "live" && <i className="live-dot" />}
+              {demoMode ? "Demo session" : snapshot.status === "live" ? "Live session" : snapshot.status === "ended" ? "Ended" : "Draft"}
             </span>
           </div>
         </div>
@@ -1142,8 +1155,8 @@ export function LiveRoom({
             <div><b>Keyboard shortcuts</b><button aria-label="Close shortcuts" onClick={() => setShortcutsOpen(false)} type="button"><X size={14} /></button></div>
             <dl>
               {canVote && <><dt>1–9</dt><dd>Choose a pointing card</dd></>}
-              {isFacilitator && !revealed && <><dt>R</dt><dd>Reveal this round</dd></>}
-              {isFacilitator && revealed && <><dt>N</dt><dd>Apply estimate and advance</dd></>}
+              {isFacilitator && !browsing && !revealed && <><dt>R</dt><dd>Reveal this round</dd></>}
+              {isFacilitator && !browsing && revealed && <><dt>N</dt><dd>Apply estimate and advance</dd></>}
               <dt>C</dt><dd>Copy invite link</dd>
               <dt>?</dt><dd>Open or close this help</dd>
             </dl>
@@ -1320,7 +1333,7 @@ export function LiveRoom({
       />
 
       <ConfirmDialog open={Boolean(conflict)} variant="primary" title="Estimate changed in Linear" description={conflict?.message ?? ""} detail="Review the change before replacing the existing estimate." confirmLabel="Save my estimate" onCancel={() => setConflict(null)} onConfirm={() => { if (conflict) { const next = conflict; setConflict(null); void action(next.action, next.payload, true); } }} />
-      <div className="mobile-agenda-nav"><label>{isFacilitator ? "Go to ticket" : "Browse agenda"}<select disabled={busy} value={viewedItem?.id ?? ""} onChange={event => { if (isFacilitator) void action("activate", { queueItemId: event.target.value }); else setBrowsingId(event.target.value); }}><option value="" disabled>Choose a ticket</option>{snapshot.queue.map(item => <option key={item.id} value={item.id}>{item.identifier} · {item.title} · {item.status === "active" ? "Current" : item.status}</option>)}</select></label></div>
+      {snapshot.status !== "ended" && <div className="mobile-agenda-nav"><label>Browse agenda<select disabled={busy} value={viewedItem?.id ?? ""} onChange={event => setBrowsingId(event.target.value === activeItem?.id ? null : event.target.value)}><option value="" disabled>Choose a ticket</option>{snapshot.queue.map(item => <option key={item.id} value={item.id}>{item.identifier} · {item.title} · {item.status === "active" ? "Current" : item.status}</option>)}</select></label></div>}
       <section className="room-grid">
         <aside className="room-queue">
           <div className="pane-heading">
@@ -1348,7 +1361,7 @@ export function LiveRoom({
                     className={`room-ticket ${item.id === snapshot.activeItemId ? "active" : ""} ${item.status}`}
                     disabled={busy}
                     onClick={() =>
-                      isFacilitator ? void action("activate", { queueItemId: item.id }) : setBrowsingId(item.id)
+                      setBrowsingId(item.id === activeItem?.id ? null : item.id)
                     }
                     type="button"
                   >
@@ -1408,7 +1421,13 @@ export function LiveRoom({
         </aside>
 
         <section className="room-issue" ref={issuePaneRef}>
-          {browsing && <div className="browse-notice" role="status"><span>Previewing {viewedItem?.identifier}. The team is on {activeItem?.identifier ?? "the summary"}.</span><button type="button" onClick={() => setBrowsingId(null)}>Return to current ticket</button></div>}
+          {browsing && <div className="browse-notice" role="status">
+            <span>Previewing {viewedItem?.identifier}. The team is on {activeItem?.identifier ?? "the summary"}.</span>
+            <div className="browse-actions">
+              <button type="button" disabled={busy} onClick={() => setBrowsingId(null)}>{activeItem ? "Return to current ticket" : "Return to summary"}</button>
+              {isFacilitator && snapshot.status !== "draft" && <button className="button button-primary" type="button" disabled={busy} onClick={() => void action("activate", { queueItemId: viewedItem?.id })}>Move team here</button>}
+            </div>
+          </div>}
           {viewedItem ? (
             <>
               <div className="issue-scroll">
@@ -1586,6 +1605,12 @@ export function LiveRoom({
                       ))}
                     </div>
                     {demoMode && !isFacilitator && !revealed && <button className="text-action" disabled={!me?.hasVoted || browsing} onClick={() => demoAction("reveal", {})} type="button">Show team votes</button>}
+                    {demoMode && !isFacilitator && revealed && (
+                      <div className="demo-next-step">
+                        <p>In a real session, your facilitator saves the agreed estimate. Try that step here with {suggestedFinalEstimate} points.</p>
+                        <button className="button button-primary" disabled={browsing || suggestedFinalEstimate === null} onClick={() => demoAction("finalize", { estimate: suggestedFinalEstimate })} type="button">Simulate save &amp; next</button>
+                      </div>
+                    )}
                   </div>
                 ) : isFacilitator ? (
                   eligibleVoterCount === 0 && !revealed ? (
@@ -1614,7 +1639,7 @@ export function LiveRoom({
               isFacilitator={isFacilitator}
               participantCount={snapshot.participants.length}
               participants={snapshot.participants}
-              prepareHref={`/app/sessions/${snapshot.id}/prepare`}
+              prepareHref={`/sessions/${snapshot.id}/prepare`}
               ticketCount={snapshot.queue.length}
               title={snapshot.title}
             />
@@ -1633,18 +1658,20 @@ export function LiveRoom({
           )}
         </section>
 
-        <aside className="room-team">
+        <aside className={`room-team ${teamExpanded ? "team-expanded" : ""} ${snapshot.status === "ended" ? "team-ended" : ""}`}>
+          <button className="mobile-team-toggle" type="button" aria-expanded={teamExpanded} aria-controls="room-participants" onClick={() => setTeamExpanded(!teamExpanded)}><Users size={16} /> Team · {snapshot.participants.length}{activeItem ? ` · ${snapshot.participants.filter(p => p.hasVoted).length} voted` : ""}</button>
           <div className="pane-heading">
             <span>TEAM</span>
             <b>
               <Users size={13} /> {snapshot.participants.length}
             </b>
           </div>
-          <div className="participant-list">
+          <div className="participant-list" id="room-participants">
             {snapshot.participants.map((person) => (
               <Participant
                 cards={snapshot.estimateCards}
-                isFacilitator={isFacilitator}
+                isFacilitator={isFacilitator && snapshot.status !== "ended"}
+                ended={snapshot.status === "ended"}
                 key={person.id}
                 onRole={(role, votingEnabled) =>
                   void action("participant-role", {
@@ -1661,7 +1688,7 @@ export function LiveRoom({
             ))}
           </div>
 
-          {isFacilitator && activeItem && (
+          {isFacilitator && activeItem && !browsing && (
             <div className="facilitator-controls">
               {revealed ? (
                 <>
@@ -1917,8 +1944,8 @@ function SessionSummary({
       <div className="session-summary-heading">
         <span><Check size={22} /></span>
         <div>
-          <p className="step-label">GROOMING SUMMARY</p>
-          <h1>{remaining.length ? "Finished for now." : "That’s the queue."}</h1>
+          <p className="step-label">Session summary</p>
+          <h1>{remaining.length ? "Finished for now." : "Session complete"}</h1>
           <p>
             {items.filter((item) => item.groomingOutcome === "ready" || item.status === "estimated").length} estimated ·{" "}
             {items.filter(item => item.status === "skipped").length} skipped ·{" "}
@@ -1976,10 +2003,11 @@ function SessionSummary({
           {copied ? <Check size={15} /> : <Copy size={15} />}
           {copied ? "Copied" : "Copy summary"}
         </button>
-        <Link className="button button-dark" href="/app">
-          Back to sessions
+        <Link className="button button-dark" href="/sessions">
+          {demoMode ? "Create your first session" : "Back to sessions"}
         </Link>
       </div>
+      {demoMode && <p>This was a practice session. Connect Linear to bring your own tickets and invite your team.</p>}
     </div>
   );
 }
@@ -1991,6 +2019,7 @@ function Participant({
   cards,
   isFacilitator,
   onRole,
+  ended = false,
 }: {
   person: SessionParticipant;
   online: boolean;
@@ -1998,6 +2027,7 @@ function Participant({
   cards: SessionSnapshot["estimateCards"];
   isFacilitator: boolean;
   onRole: (role: ParticipantRole, votingEnabled: boolean) => void;
+  ended?: boolean;
 }) {
   return (
     <div className={`participant ${online ? "online" : ""}`}>
@@ -2035,7 +2065,7 @@ function Participant({
           </small>
         )}
       </div>
-      <span className={`vote-status ${person.hasVoted ? "done" : ""} ${revealed ? "revealed" : ""}`}>
+      {!ended && <span role="img" aria-label={revealed && person.vote !== null ? `${person.name}: ${voteLabel(person.vote, cards)} points` : person.hasVoted ? `${person.name}: voted` : !person.votingEnabled ? `${person.name}: not voting` : `${person.name}: waiting for vote`} className={`vote-status ${person.hasVoted ? "done" : ""} ${revealed ? "revealed" : ""}`}>
         {revealed && person.vote !== null ? (
           voteLabel(person.vote, cards)
         ) : person.hasVoted ? (
@@ -2045,8 +2075,8 @@ function Participant({
         ) : (
           "…"
         )}
-      </span>
-      <i className="presence-dot" />
+      </span>}
+      {!ended && <i className="presence-dot" />}
     </div>
   );
 }

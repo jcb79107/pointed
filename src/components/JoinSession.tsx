@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { ArrowRight, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -65,9 +67,9 @@ export function JoinSession({
             >
               <RotateCcw size={16} /> Try again
             </button>
-            <a className="button button-dark" href="/app">
+            <Link className="button button-dark" href="/sessions">
               Back to sessions <ArrowRight size={16} />
-            </a>
+            </Link>
           </>
         ) : (
           <>

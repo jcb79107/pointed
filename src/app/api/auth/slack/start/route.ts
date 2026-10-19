@@ -8,8 +8,8 @@ import { slackOAuthConfigured } from "@/lib/slack-connections";
 export async function GET() {
   const { APP_URL } = getServerEnv();
   const user = await getCurrentUser();
-  if (!user) return NextResponse.redirect(new URL("/app", APP_URL));
-  if (!slackOAuthConfigured()) return NextResponse.redirect(new URL("/app/settings?slack=unavailable#slack", APP_URL));
+  if (!user) return NextResponse.redirect(new URL("/sessions", APP_URL));
+  if (!slackOAuthConfigured()) return NextResponse.redirect(new URL("/settings?slack=unavailable#slack", APP_URL));
   const state = randomToken();
   const jar = await cookies();
   const options = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 600 };

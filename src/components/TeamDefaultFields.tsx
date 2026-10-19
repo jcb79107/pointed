@@ -5,33 +5,14 @@ export function TeamDefaultFields({
   value,
   onChange,
   disabled = false,
+  session = false,
 }: {
   value: TeamDefaults;
   onChange: (value: TeamDefaults) => void;
   disabled?: boolean;
+  session?: boolean;
 }) {
-  return (
-    <fieldset className="team-default-fields" disabled={disabled}>
-      <legend className="sr-only">Session defaults</legend>
-      <label>
-        Default cycle
-        <select
-          aria-label="Default cycle"
-          value={String(value.cycleOffset)}
-          onChange={(e) =>
-            onChange({
-              ...value,
-              cycleOffset: cycleOffsetFromValue(e.target.value),
-            })
-          }
-        >
-          {cycleChoices.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-      </label>
+  const fields = <>
       <label>
         Starting ticket order
         <select
@@ -75,6 +56,17 @@ export function TeamDefaultFields({
           <option value="yes">On — vote with the team</option>
         </select>
       </label>
+  </>;
+  return (
+    <fieldset className="team-default-fields" disabled={disabled}>
+      <legend className="sr-only">Session defaults</legend>
+      <label>
+        {session ? "Cycle" : "Default cycle"}
+        <select aria-label={session ? "Cycle" : "Default cycle"} value={String(value.cycleOffset)} onChange={e => onChange({...value, cycleOffset: cycleOffsetFromValue(e.target.value)})}>
+          {cycleChoices.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+        </select>
+      </label>
+      {session ? <details className="session-options"><summary>Session options</summary><div className="session-options-fields">{fields}</div></details> : fields}
     </fieldset>
   );
 }

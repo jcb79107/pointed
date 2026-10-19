@@ -88,7 +88,7 @@ export function DashboardClient({
         }
         throw new Error(result.error ?? "Could not create session");
       }
-      router.push(`/app/sessions/${result.session.id}/prepare`);
+      router.push(`/sessions/${result.session.id}/prepare`);
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Could not create session",
@@ -108,7 +108,7 @@ export function DashboardClient({
             <b>{user.name}</b>
             <small>Linear connected</small>
           </div>
-          <Link aria-label="Settings" className="header-icon-link" href="/app/settings">
+          <Link aria-label="Settings" className="header-icon-link" href="/settings">
             <Settings size={16} />
           </Link>
           <form noValidate action="/api/auth/logout" method="post">
@@ -195,7 +195,7 @@ export function DashboardClient({
                 Cancel
               </button>
               <button
-                className="button button-dark"
+                className="button button-primary"
                 disabled={!title.trim() || !teamId || busy}
                 type="submit"
               >
@@ -231,7 +231,7 @@ export function DashboardClient({
               {initialSessions.map((session) => {
                 const destination =
                   session.status === "draft"
-                    ? `/app/sessions/${session.id}/prepare`
+                    ? `/sessions/${session.id}/prepare`
                     : `/sessions/${session.id}`;
                 return (
                   <Link
@@ -251,7 +251,7 @@ export function DashboardClient({
                     <div className="session-info">
                       <b>{session.title}</b>
                       <span>
-                        {session.teamName} · {session.issueCount}{" "}
+                        {session.status === "draft" ? "Draft" : session.status === "live" ? "Live" : "Ended"} · {session.teamName} · {session.issueCount}{" "}
                         {session.issueCount === 1 ? "ticket" : "tickets"}
                       </span>
                     </div>
@@ -263,7 +263,7 @@ export function DashboardClient({
                       }).format(new Date(session.updatedAt))}
                     </div>
                     <span className="session-open">
-                      {session.status === "draft" ? "Prepare" : "Open"}
+                      {session.status === "draft" ? "Prepare" : session.status === "ended" ? "View summary" : "Join session"}
                       <ArrowRight size={15} />
                     </span>
                   </Link>

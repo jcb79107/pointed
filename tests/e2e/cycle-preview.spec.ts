@@ -111,11 +111,11 @@ test("cycle preview loads, reorders with keyboard, removes, and preserves edits 
     });
   });
   await page.goto(fixture);
-  await expect(page.getByLabel("Default cycle")).toHaveValue("1");
+  await expect(page.getByLabel("Cycle")).toHaveValue("1");
   await expect(
     page.getByRole("button", { name: "Start session" }),
   ).toBeDisabled();
-  await page.getByLabel("Default cycle").selectOption("2");
+  await page.getByLabel("Cycle").selectOption("2");
   await page.getByRole("button", { name: "Load agenda", exact: true }).click();
   await expect(page.getByText("Cycle 20", { exact: true })).toBeVisible();
   await expect(page.locator(".queue-edit-row")).toHaveCount(3);
@@ -167,14 +167,14 @@ test("missing cycle and empty agenda explain how to recover", async ({
     return route.fulfill({ json: { snapshot: { ...snapshot(), queue: [] } } });
   });
   await page.goto(fixture);
-  await page.getByLabel("Default cycle").selectOption("3");
+  await page.getByLabel("Cycle").selectOption("3");
   await page.getByRole("button", { name: "Load agenda", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "does not exist yet",
   );
-  await expect(page.getByLabel("Default cycle")).toHaveValue("3");
+  await expect(page.getByLabel("Cycle")).toHaveValue("3");
   empty = true;
-  await page.getByLabel("Default cycle").selectOption("1");
+  await page.getByLabel("Cycle").selectOption("1");
   await page.getByRole("button", { name: "Load agenda", exact: true }).click();
   await expect(
     page.getByText("No tickets to point", { exact: true }),
