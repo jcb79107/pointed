@@ -7483,7 +7483,6 @@ h3,
   color: var(--ink);
 }
 
-.landing-how-link { margin-left: auto; margin-right: 20px; }
 
 .landing-hero {
   width: min(1280px, calc(100% - 48px));
@@ -7524,6 +7523,8 @@ h3,
 
 .landing-primary-action {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: center;
   margin-top: 28px;
 }
@@ -8573,7 +8574,6 @@ h3,
 }
 
 @media (max-width: 700px) {
-  .landing-nav .landing-how-link { display: inline-flex; margin-right: 0; }
   .landing-process { width: calc(100% - 28px); margin-bottom: 68px; padding-top: 36px; }
   .not-found-actions { flex-direction: column; }
 }

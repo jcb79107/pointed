@@ -19,9 +19,6 @@ export default function Home() {
     <main className="landing-shell">
       <nav className="landing-nav" aria-label="Primary navigation">
         <Brand />
-        <Link className="landing-nav-link landing-how-link" href="#how-it-works">
-          How it works
-        </Link>
         <div className="nav-actions">
           <a
             className="landing-nav-link"
