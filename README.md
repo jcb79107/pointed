@@ -15,12 +15,12 @@ The product decisions behind the configurable workflow are documented in
 
 Prepare unestimated tickets in a Linear cycle. Load them into Pointed, adjust the agenda, and share a room link. Developers read and vote on their own screens. Reveal, discuss, and let the facilitator save the agreed estimate to Linear.
 
-**Public beta:** real-team pilot verification is still in progress. See the [launch checklist](docs/launch/READINESS.md) for evidence and remaining limits.
+**Public beta:** single-team weekly use is reported; broader pilot verification is still in progress. See the [launch checklist](docs/launch/READINESS.md) for evidence and remaining limits.
 
 ## What is implemented
 
 - public Linear OAuth with PKCE, CSRF state validation, and read-first / optional
-  write scopes; there is no workspace allowlist
+  write scopes; public deployments accept any workspace; private deployments can set `ALLOWED_LINEAR_ORG_KEY`
 - encrypted OAuth tokens, server-side refresh, and opaque HTTP-only sessions
 - shared per-team defaults for relative cycle, import order, reveal timing, and
   facilitator voting; personal appearance settings
@@ -87,8 +87,11 @@ npm install
 npm run dev
 ```
 
-Pusher is optional. Without it, the room uses a 5-second polling fallback. Add
-the Pusher variables when you want more responsive live updates.
+Pusher is optional. Leave all six Pusher values blank in `.env.local` for a
+5-second polling fallback. For instant updates, fill the four server values and
+set `NEXT_PUBLIC_PUSHER_KEY` and `NEXT_PUBLIC_PUSHER_CLUSTER` to the matching key
+and cluster. Restart the development server (or rebuild for production) after
+changing public values; never expose `PUSHER_SECRET` to the browser.
 
 All Linear teams with estimates enabled appear in the team picker. Every new session
 uses the selected team's exact scale. The MVP has no custom deck override;
@@ -144,6 +147,14 @@ Licensed under the [MIT License](LICENSE).
 - All mutating endpoints enforce an authenticated same-origin request.
 - Every room snapshot requires persisted membership.
 - Every participant is checked against the room's Linear team when joining.
+- Protected room snapshots, votes, facilitator actions, and new realtime
+  authorizations also revalidate current Linear team access. Checks are not
+  cached, so polling adds provider requests. A Linear outage temporarily blocks
+  new protected reads/actions with a retryable response; confirmed access denial
+  clears the room UI and disconnects that browser's realtime client. Presence
+  publishes only opaque user IDs, never profile names or avatar URLs. Previously
+  downloaded data cannot be remotely erased, and this is not server-enforced
+  disconnection of already-connected third-party realtime subscribers.
 - The server refetches selected issues; queue metadata is never trusted from the
   browser.
 - Unrevealed vote values are removed from snapshots and never enter Pusher.

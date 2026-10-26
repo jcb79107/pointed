@@ -9,7 +9,7 @@ vi.mock("server-only", () => ({}));
 vi.mock("next/headers", () => ({ cookies: async () => mocks.cookies }));
 vi.mock("@/lib/env", () => ({ getServerEnv: mocks.getServerEnv }));
 vi.mock("@/lib/complete-login", () => ({ completeLogin: mocks.completeLogin }));
-vi.mock("@linear/sdk", () => ({ LinearClient: class { viewer = Promise.resolve({id:"verified-user", email:"person@example.test", displayName:"Person", avatarUrl:null, organization:Promise.resolve({id:"verified-org"})}); } }));
+vi.mock("@linear/sdk", () => ({ LinearClient: class { viewer = Promise.resolve({id:"verified-user", email:"person@example.test", displayName:"Person", avatarUrl:null, organization:Promise.resolve({id:"verified-org",urlKey:"allowed-workspace"})}); } }));
 vi.mock("@/db", () => ({ db: {} }));
 import { GET } from "./route";
 
@@ -28,6 +28,18 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
 });
 afterEach(() => vi.unstubAllGlobals());
+
+it.each(["allowed-workspace", "another-workspace"])("enforces the optional private workspace restriction: %s", async (workspace) => {
+  mocks.getServerEnv.mockReturnValue({APP_URL:"https://pointed.test", ALLOWED_LINEAR_ORG_KEY:workspace});
+  vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({access_token:"fixture",refresh_token:"fixture",expires_in:3600,scope:"read"})));
+  const response = await callback("state=valid&code=provider-code");
+  if (workspace === "allowed-workspace") {
+    expect(mocks.completeLogin).toHaveBeenCalledOnce();
+  } else {
+    expect(mocks.completeLogin).not.toHaveBeenCalled();
+    expect(response.headers.get("location")).toContain("authError=workspace_not_allowed");
+  }
+});
 
 describe("Linear OAuth recovery", () => {
   it("returns a denied guest to their invitation with retry guidance", async () => {

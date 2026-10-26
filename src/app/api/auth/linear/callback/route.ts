@@ -82,6 +82,10 @@ export async function GET(request: Request) {
   const viewer = await client.viewer;
   const organization = await viewer.organization;
 
+  if (env.ALLOWED_LINEAR_ORG_KEY && organization.urlKey !== env.ALLOWED_LINEAR_ORG_KEY) {
+    return redirectWithAuthError("workspace_not_allowed");
+  }
+
   const scopes = Array.isArray(tokens.scope)
     ? tokens.scope : tokens.scope.split(/[,\s]+/).filter(Boolean);
   await completeLogin({

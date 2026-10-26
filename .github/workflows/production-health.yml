@@ -18,3 +18,5 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check-production.mjs
+        env:
+          APP_URL: ${{ vars.APP_URL }}
