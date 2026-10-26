@@ -26,6 +26,10 @@ jobs:
       - run: npm run build -- --webpack
         env:
           NEXT_PUBLIC_SENTRY_DSN: https://public@sentry.invalid/1
+      # The Azure Ubuntu mirror repeatedly stalled browser dependency downloads.
+      # Keep Ubuntu package signatures and versions; use the canonical mirror.
+      - name: Use Ubuntu mirror for browser dependencies
+        run: sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:ui
         env:
