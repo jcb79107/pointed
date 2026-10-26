@@ -21,8 +21,8 @@ Sentry receives filtered errors and optional feedback. Recording starts only on 
 ## Remaining validation
 
 1. Run a complete session with two authorized accounts and disposable Linear issues: cycle import, reorder/remove, independent browsing, private votes, reconnect, reveal, writeback, and deletion. Repeat access checks across a second real workspace. Only the two explicitly authorized synthetic Linear tickets were changed, then restored.
-2. Recheck backup retention and repeat recovery with populated disposable sessions. The September 30 [restore drill](RESTORE-DRILL.md) passed, but the window observed then was only six hours; current retention has not been reverified.
-3. Observe 2–3 real teams completing a session. No real-team pilot evidence is claimed yet.
+2. Decide whether six-hour Neon history retention is sufficient. Retention was reverified on October 26; a populated private clone passed the upgrade rehearsal and a separate pre-upgrade recovery branch is retained. See the [restore drill](RESTORE-DRILL.md).
+3. Observe 2–3 real teams completing a session. Jason reports weekly private-app use by his team; broader independent-team validation remains outstanding.
 4. Verify GitHub failure notifications and assess performance with actual traffic before claiming field Core Web Vitals targets.
 
 ## Branding and launch URL
