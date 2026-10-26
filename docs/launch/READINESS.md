@@ -21,7 +21,7 @@ Sentry receives filtered errors and optional feedback. Recording starts only on 
 ## Remaining validation
 
 1. Run a complete session with two authorized accounts and disposable Linear issues: cycle import, reorder/remove, independent browsing, private votes, reconnect, reveal, writeback, and deletion. Repeat access checks across a second real workspace. Only the two explicitly authorized synthetic Linear tickets were changed, then restored.
-2. Decide whether six-hour Neon history retention is sufficient. Retention was reverified on October 26; a populated private clone passed the upgrade rehearsal and a separate pre-upgrade recovery branch is retained. See the [restore drill](RESTORE-DRILL.md).
+2. Decide whether six-hour Neon history retention is sufficient. Retention was reverified on October 26; a populated isolated clone passed the upgrade rehearsal and a separate pre-upgrade recovery branch is retained. See the [restore drill](RESTORE-DRILL.md).
 3. Observe 2–3 real teams completing a session. Jason reports weekly private-app use by his team; broader independent-team validation remains outstanding.
 4. Verify GitHub failure notifications and assess performance with actual traffic before claiming field Core Web Vitals targets.
 
@@ -37,6 +37,6 @@ See [operations](OPERATIONS.md) and the [deployment baseline](DEPLOYMENT.md).
 - Updated Next.js to 16.4.3, Zod to a patched 4.6 release, Vitest to 4.1.12, and Vite to a patched release. Both production and full npm audits report zero vulnerabilities.
 - 289 unit/integration checks passed, including real disposable PostgreSQL RLS fixtures, provider error contracts, session access checks, and private-workspace OAuth restrictions. Lint, typecheck, and production build passed.
 - Production-build browser suite: 188 passed across desktop/tablet/phone Chromium and mobile WebKit; 8 recorder tests skipped because the local build has no Sentry DSN. These are isolated browser fixtures, not live multi-account Linear evidence.
-- Private database migration rehearsal preserved 9 sessions, 98 queue items, 36 participant records, 96 rounds, and 223 votes; all 14 tables enforce RLS. A separate pre-upgrade branch is retained.
+- Database migration rehearsal on an isolated populated branch preserved existing record counts; all 14 application tables enforce RLS. Detailed deployment records remain private.
 - Jason reports weekly use of the private app. This is useful single-team pilot evidence, but not a claim that multiple teams or live revocation have been validated. After parity deployment, weekly use will exercise the shared release.
 - Public and private Neon projects currently have six-hour history retention. Private pre-upgrade recovery is additionally retained in a branch; broader backup retention remains an operator decision.
