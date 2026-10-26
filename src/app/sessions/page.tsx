@@ -14,6 +14,7 @@ import { listPokerSessions } from "@/lib/sessions";
 export const dynamic = "force-dynamic";
 
 const authErrors: Record<string, string> = {
+  workspace_not_allowed: "This app is restricted to your team's Linear workspace. Sign in with that workspace to continue.",
   invalid_oauth_state: "The Linear sign-in expired. Please try again.",
   token_exchange_failed: "Linear could not complete sign-in. Please try again.",
 };

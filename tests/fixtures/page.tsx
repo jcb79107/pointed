@@ -33,7 +33,7 @@ export default async function Fixture({
       <aside aria-label="Preview environment" className="fixture-banner">
         Local preview · Synthetic tickets and accounts
       </aside>
-      {screen === "live" ? (
+      {screen === "live" || screen === "room" ? (
         <LiveRoom initialSnapshot={demoSnapshot} />
       ) : screen === "settings" ? (
         <SettingsClient

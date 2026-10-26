@@ -7,6 +7,7 @@ const serverEnvSchema = z.object({
   TOKEN_ENCRYPTION_KEY: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   AUTH_DATABASE_URL: z.string().min(1),
+  ALLOWED_LINEAR_ORG_KEY: z.string().optional(),
   PUSHER_APP_ID: z.string().min(1),
   PUSHER_KEY: z.string().min(1),
   PUSHER_SECRET: z.string().min(1),
@@ -34,10 +35,13 @@ export function getServerEnv(): ServerEnv {
     TOKEN_ENCRYPTION_KEY: process.env.TOKEN_ENCRYPTION_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
     AUTH_DATABASE_URL: process.env.AUTH_DATABASE_URL,
-    PUSHER_APP_ID: process.env.PUSHER_APP_ID ?? "disabled",
-    PUSHER_KEY: process.env.PUSHER_KEY ?? "disabled",
-    PUSHER_SECRET: process.env.PUSHER_SECRET ?? "disabled",
-    PUSHER_CLUSTER: process.env.PUSHER_CLUSTER ?? "us2",
+    ALLOWED_LINEAR_ORG_KEY: process.env.ALLOWED_LINEAR_ORG_KEY?.trim() || undefined,
+    // Optional values copied from .env.example are empty strings, not undefined.
+    // Treat blank credentials as disabled so the polling fallback still works.
+    PUSHER_APP_ID: process.env.PUSHER_APP_ID?.trim() || "disabled",
+    PUSHER_KEY: process.env.PUSHER_KEY?.trim() || "disabled",
+    PUSHER_SECRET: process.env.PUSHER_SECRET?.trim() || "disabled",
+    PUSHER_CLUSTER: process.env.PUSHER_CLUSTER?.trim() || "us2",
   });
 
   if (!parsed.success) {
