@@ -8,7 +8,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { safeReturnTo } from "@/lib/http";
 import { isAppConfigured } from "@/lib/env";
 import { listLinearTeams } from "@/lib/linear";
-import { getUserSettings } from "@/lib/settings";
 import { listPokerSessions } from "@/lib/sessions";
 
 export const dynamic = "force-dynamic";
@@ -73,10 +72,9 @@ export default async function AppHome({
 
   if (destination !== "/sessions") redirect(destination);
 
-  const [teams, sessions, settings] = await Promise.all([
+  const [teams, sessions] = await Promise.all([
     listLinearTeams(user.id),
     listPokerSessions(user.id, user.organizationId),
-    getUserSettings(user.id),
   ]);
 
   return (
@@ -86,7 +84,6 @@ export default async function AppHome({
         avatarUrl: user.avatarUrl,
       }}
       teams={teams}
-      settings={settings}
       initialSessions={sessions.map((session) => ({
         ...session,
         updatedAt: session.updatedAt.toISOString(),

@@ -48,18 +48,27 @@ await writeFile(
   path.join(dir, "src/app/api/fixture-snapshot/route.ts"),
   'import { demoSnapshot } from "@/fixture";\nexport function GET() { return Response.json({ snapshot: demoSnapshot }); }\n',
 );
+// The isolated fixture omits server modules; the real app is typechecked separately.
+await writeFile(path.join(dir, "next.config.mjs"),
+  'export default { typescript: { ignoreBuildErrors: true } };');
+const production = Boolean(process.env.UI_TEST_PRODUCTION);
+const options = {
+  cwd: dir,
+  stdio: "inherit",
+  env: { PATH: process.env.PATH, HOME: process.env.HOME, NODE_ENV: production ? "production" : "development" },
+};
+const next = path.join(root, "node_modules/.bin/next");
+if (production) {
+  const build = spawn(next, ["build", "--webpack"], options);
+  const code = await new Promise(resolve => build.on("exit", resolve));
+  if (code !== 0) process.exit(code ?? 1);
+}
 const child = spawn(
-  path.join(root, "node_modules/.bin/next"),
-  ["dev", "--webpack", "--port", "3005", "--hostname", "127.0.0.1"],
-  {
-    cwd: dir,
-    stdio: "inherit",
-    env: {
-      PATH: process.env.PATH,
-      HOME: process.env.HOME,
-      NODE_ENV: "development",
-    },
-  },
+  next,
+  production
+    ? ["start", "--port", "3005", "--hostname", "127.0.0.1"]
+    : ["dev", "--webpack", "--port", "3005", "--hostname", "127.0.0.1"],
+  options,
 );
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => child.kill(signal));

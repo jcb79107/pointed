@@ -5,6 +5,7 @@ import {
   ExternalLink,
   Monitor,
   Moon,
+  Palette,
   Sun,
 } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +26,6 @@ import {
   type ThemePreference,
 } from "@/lib/theme";
 import { requestJson } from "@/lib/client-request";
-import { Palette } from "lucide-react";
 const themeOptions = [
   {
     id: "system",
@@ -88,9 +88,6 @@ export function SettingsClient({
     readThemePreference,
     getServerThemePreference,
   );
-  function chooseTheme(value: ThemePreference) {
-    saveThemePreference(value);
-  }
   useEffect(() => {
     if (!anyDirty) return;
     function beforeUnload(event: BeforeUnloadEvent) {
@@ -312,7 +309,7 @@ export function SettingsClient({
                       aria-pressed={selected}
                       className={`theme-option ${selected ? "selected" : ""}`}
                       key={option.id}
-                      onClick={() => chooseTheme(option.id)}
+                      onClick={() => saveThemePreference(option.id)}
                       type="button"
                     >
                       <span>

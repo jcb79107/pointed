@@ -2767,6 +2767,11 @@ code {
 }
 
 .room-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
   position: fixed;
   z-index: 31;
   top: 78px;
@@ -2779,6 +2784,14 @@ code {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   font-size: 11px;
   transform: translateX(-50%);
+}
+
+.room-notice button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
 }
 
 .room-sync-status {
@@ -4505,25 +4518,6 @@ body {
   background: var(--panel);
 }
 
-.summary-list > a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  color: inherit;
-  text-decoration: none;
-}
-
-.summary-list > a:last-child {
-  border-bottom: 0;
-}
-
-.summary-list > a:hover {
-  background: var(--paper);
-}
-
 .summary-list a > div {
   display: grid;
   gap: 3px;
@@ -4571,7 +4565,6 @@ body {
   .finish-session-button span { display: none; }
   .finish-session-button svg { color: var(--muted); flex-shrink: 0; }
   .session-summary { width: calc(100% - 28px); padding-top: 28px; }
-  .summary-list > a { align-items: flex-start; flex-direction: column; gap: 8px; }
 }
 
 /* UX audit improvements */
@@ -8639,7 +8632,8 @@ h3,
 .browse-actions button { min-height: 44px; }
 .browse-actions button:not(.button) { text-decoration: underline; }
 .vote-disagreement { margin: 0 0 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
-.summary-item { border-bottom: 1px solid var(--line); }
+.summary-item { padding: 0 16px; border-bottom: 1px solid var(--line); }
+.summary-item:last-child { border-bottom: 0; }
 .summary-item > .summary-ticket { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
 .summary-item > .summary-ticket > div { display: flex; flex-direction: column; gap: 5px; }
 .summary-item > .summary-ticket em { font-size: 12px; font-style: normal; }

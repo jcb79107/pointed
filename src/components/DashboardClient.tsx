@@ -20,7 +20,6 @@ import { Brand } from "@/components/Brand";
 import type {
   LinearTeamSummary,
   SessionStatus,
-  UserSettings,
 } from "@/lib/domain";
 
 
@@ -38,7 +37,6 @@ interface SessionListItem {
 interface DashboardClientProps {
   user: { name: string; avatarUrl: string | null };
   teams: LinearTeamSummary[];
-  settings: UserSettings;
   initialSessions: SessionListItem[];
 }
 
