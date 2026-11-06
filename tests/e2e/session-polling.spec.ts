@@ -9,8 +9,11 @@ test('fallback polling pauses in hidden and offline tabs, then refreshes immedia
   await page.clock.install();
   await page.goto('http://127.0.0.1:3005/?screen=live');
   await expect(page.getByRole('heading', { name: 'Retry failed webhook deliveries', exact: true })).toBeVisible();
-  await page.clock.runFor(5000);
-  await expect.poll(() => requests).toBe(1);
+  // The server-rendered heading can appear before the polling effect is registered.
+  await expect.poll(async () => {
+    await page.clock.runFor(1000);
+    return requests;
+  }).toBe(1);
   await expect(page.getByText('Reconnecting to the session…')).toBeVisible();
   await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }));
   await page.clock.runFor(15000);
