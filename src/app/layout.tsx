@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SessionAnalytics } from "@/components/SessionAnalytics";
 
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 
@@ -51,7 +52,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col" data-clarity-mask="true">{children}<SessionAnalytics /></body>
     </html>
   );
 }
