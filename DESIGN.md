@@ -71,12 +71,12 @@ font-family: "SF Pro Text", "SF Pro Display", Inter, ui-sans-serif,
   -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 ```
 
-- Marketing display: 52–80px, 600, line-height 1.02, tracking `-0.045em`.
+- Marketing display: 52–80px, 600, line-height 1.02, tracking `-0.035em`.
 - Product page title: 34–48px, 600, line-height 1.1, tracking `-0.035em`.
 - Card title: 20–22px, 500–600.
 - Body: 14–16px, 400, line-height 1.5.
 - Button: 14px, 500.
-- Eyebrow and metadata: 12–13px, 500, slight positive tracking.
+- Eyebrow and metadata: 12–14px, 500, sentence case, normal tracking. Preserve Linear identifiers and user content.
 - Mono is reserved for issue IDs, timers, and shortcuts.
 
 ## Shape and spacing
@@ -86,6 +86,8 @@ font-family: "SF Pro Text", "SF Pro Display", Inter, ui-sans-serif,
 - Card radius: 12px.
 - Product frame radius: 16px.
 - Panel padding: 24px by default.
+- Mobile navigation and preference choices stay visible with 44px minimum targets.
+- Project and owner context use quiet text; compact pills identify actual labels or status.
 - Section spacing: 64–96px on marketing pages, 32–56px in product screens.
 - Buttons are at least 40px high on desktop and 44px on touch layouts.
 - Inputs are at least 44px high on touch layouts.
@@ -161,3 +163,11 @@ Start session are grouped after the agenda. Destructive draft management is sepa
 Mobile team visibility uses a labeled disclosure, never silent removal of the roster.
 Completed rooms retain history without editable roles or pending-vote indicators.
 The landing illustration follows the dark marketing surface; app themes remain unchanged.
+
+## Analytics consent
+
+Keep optional analytics choices in normal document flow above the app so they
+never cover voting or facilitator controls. Use equal-weight, 44px actions and
+the existing neutral surfaces. The marketing notice follows the dark landing
+surface. Persistent preferences belong inside the Privacy article next to the
+analytics explanation, not in a separate floating card.
