@@ -1,4 +1,6 @@
-# <img src="public/pointed-mark.svg" width="40" alt="" /> Pointed
+![Pointed — pointing poker for Linear](docs/launch/pointed-banner.png)
+
+# Pointed
 
 [Open Pointed](https://getpointed.app) · [Try the demo](https://getpointed.app/demo) · [Help](https://getpointed.app/support) · [Privacy](https://getpointed.app/privacy)
 
