@@ -417,19 +417,6 @@ export async function searchLinearIssues(
   );
 }
 
-export async function getUpcomingLinearCycle(
-  userId: string,
-  teamId: string,
-): Promise<UpcomingLinearCycle | null> {
-  const client = await getLinearClient(userId);
-  const team = await client.team(teamId);
-  const cycles = await team.cycles({
-    first: 50,
-    filter: { isFuture: { eq: true } },
-  });
-  return findUpcomingLinearCycle(cycles.nodes);
-}
-
 export async function getLinearIssueFilterOptions(
   userId: string,
   teamId: string,
@@ -572,20 +559,6 @@ export async function updateLinearIssueEstimate(
     throw new Error("Linear did not confirm the estimate update");
   }
   return summarizeIssue(issue);
-}
-
-export async function createLinearIssueComment(
-  userId: string,
-  issueId: string,
-  body: string,
-): Promise<void> {
-  const { scopes } = await getLinearAccessToken(userId);
-  if (!scopes.includes("write") && !scopes.includes("comments:create")) {
-    throw new Error("Linear comment permission is required");
-  }
-  const client = await getLinearClient(userId);
-  const payload = await client.createComment({ issueId, body });
-  if (!payload.success) throw new Error("Linear did not confirm the comment");
 }
 
 export async function userHasTeamAccess(

@@ -39,6 +39,9 @@ await writeFile(
     .replace('import { LiveRoom } from "@/components/LiveRoom";', "")
     .replace("const demoSnapshot", "export const demoSnapshot"),
 );
+await mkdir(path.join(dir, "src/app/fixture-snapshot"), { recursive: true });
+await writeFile(path.join(dir, "src/app/fixture-snapshot/route.ts"),
+  'import { demoSnapshot } from "@/fixture"; export function GET() { return Response.json(demoSnapshot); }');
 await copyFile(
   path.join(root, "tests/fixtures/page.tsx"),
   path.join(dir, "src/app/page.tsx"),

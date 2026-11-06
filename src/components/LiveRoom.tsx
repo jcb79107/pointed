@@ -274,6 +274,12 @@ function LiveRoomContent({
     return () => controller.abort();
   }, [browsingId, checkRoomAccess, demoMode, initialSnapshot.id]);
 
+  useEffect(() => {
+    if (!previewNotice) return;
+    const timeout = window.setTimeout(() => setPreviewNotice(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [previewNotice]);
+
   const refreshInFlight = useRef<Promise<boolean> | null>(null);
   const addIssueDialogRef = useRef<HTMLElement>(null);
   const addIssueReturnFocusRef = useRef<HTMLElement | null>(null);
@@ -837,39 +843,35 @@ function LiveRoomContent({
     }
     setBusy(true);
     try {
-      const shouldOverwrite = overwrite;
-      while (true) {
-        const { data, response } = await requestRoomJson<RoomApiResponse>(
-          `/api/sessions/${snapshot.id}/actions`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: actionName,
-              ...payload,
-              ...(shouldOverwrite ? { overwrite: true } : {}),
-            }),
-          },
-        );
-        if (response.status === 409 && !shouldOverwrite) {
-          setConflict({ action: actionName, payload, message: data.error ?? "This estimate changed in Linear." });
-          return;
+      const { data, response } = await requestRoomJson<RoomApiResponse>(
+        `/api/sessions/${snapshot.id}/actions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: actionName,
+            ...payload,
+            ...(overwrite ? { overwrite: true } : {}),
+          }),
+        },
+      );
+      if (response.status === 409 && !overwrite) {
+        setConflict({ action: actionName, payload, message: data.error ?? "This estimate changed in Linear." });
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not update the session");
+      }
+      setBrowsingId(null);
+      if (data.snapshot) {
+        if (data.snapshot.activeItemId !== snapshot.activeItemId) {
+          setFinalEstimate(null);
         }
-        if (!response.ok) {
-          throw new Error(data.error ?? "Could not update the session");
-        }
-        setBrowsingId(null);
-        if (data.snapshot) {
-          if (data.snapshot.activeItemId !== snapshot.activeItemId) {
-            setFinalEstimate(null);
-          }
-          setSnapshot(data.snapshot);
-          if (actionName === "finalize") setPreviewNotice(`${activeItem?.identifier ?? "Estimate"} saved to Linear.`);
-          setSyncState("connected");
-        } else {
-          await refresh();
-        }
-        break;
+        setSnapshot(data.snapshot);
+        if (actionName === "finalize") setPreviewNotice(`${activeItem?.identifier ?? "Estimate"} saved to Linear.`);
+        setSyncState("connected");
+      } else {
+        await refresh();
       }
     } catch (caught) {
       setError(
@@ -902,7 +904,6 @@ function LiveRoomContent({
       setSnapshot(data.snapshot);
       setSyncState("connected");
       setPreviewNotice("Ticket preview refreshed from Linear.");
-      window.setTimeout(() => setPreviewNotice(null), 2200);
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -1230,7 +1231,10 @@ function LiveRoomContent({
         </div>
       )}
       {error && <div className="room-error" role="alert">{error}</div>}
-      {previewNotice && <div className="room-notice">{previewNotice}</div>}
+      {previewNotice && <div className="room-notice">
+        <span role="status">{previewNotice}</span>
+        <button type="button" aria-label="Dismiss notification" onClick={() => setPreviewNotice(null)}><X size={16} aria-hidden="true" /></button>
+      </div>}
       {syncState !== "connected" && (
         <div className="room-sync-status" role="status">
           <LoaderCircle className={syncState === "reconnecting" ? "spin" : ""} size={14} />

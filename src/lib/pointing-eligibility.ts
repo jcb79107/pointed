@@ -3,7 +3,6 @@ import type {
   TicketEstimateScope,
 } from "@/lib/domain";
 
-export const LINEAR_TODO_STATE_TYPE = "unstarted";
 export const DEFAULT_POINTING_POLICY: PointingEligibilityPolicy = {
   stateTypes: ["unstarted"],
   estimateScope: "unestimated",

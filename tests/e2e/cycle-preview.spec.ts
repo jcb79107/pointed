@@ -129,7 +129,7 @@ test("cycle preview loads, reorders with keyboard, removes, and preserves edits 
   );
   await page.getByRole("button", { name: "Remove API-1", exact: true }).click();
   await expect(page.locator(".queue-edit-row")).toHaveCount(2);
-  await page.screenshot({ path: `docs/pilot/cycle-workflow/agenda-${testInfo.project.name}.png`, fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("agenda.png"), fullPage: true });
   failLoad = true;
   await page
     .getByRole("button", { name: "Reload agenda", exact: true })
@@ -227,7 +227,7 @@ test("team settings preserve edits on errors and clearly save per team", async (
   await expect(page.getByRole("status").first()).toContainText(
     "Defaults saved for Platform API",
   );
-  await page.screenshot({ path: `docs/pilot/cycle-workflow/settings-${testInfo.project.name}.png`, fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("settings.png"), fullPage: true });
   expect(writes).toEqual(["/api/teams/team-a/defaults"]);
   await expect(
     page.getByRole("button", { name: "Save team defaults" }),
