@@ -147,7 +147,7 @@ test('revealed individual votes remain visible on phones', async ({ page }) => {
   await expect(votes).toContainText('Richard');
   await expect(votes).toContainText('Dinesh');
   await expect(votes).toContainText('Gilfoyle');
-  await expect(page.locator('.result-label')).toHaveText('FINAL ESTIMATEAverage 2.3');
+  await expect(page.locator('.result-label')).toHaveText('Final estimateAverage 2.3');
   await expect(page.locator('.final-values button')).toHaveText(['1', '2', '3', '4']);
 });
 

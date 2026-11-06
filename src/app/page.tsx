@@ -36,7 +36,7 @@ export default function Home() {
 
       <section className="landing-hero">
         <div className="landing-hero-copy">
-          <p className="landing-kicker">POINTING POKER FOR LINEAR</p>
+          <p className="landing-kicker">Pointing poker for Linear</p>
           <h1>Point Linear tickets with your team.</h1>
           <p className="landing-summary">
             Run pointing sessions without sharing your screen. Everyone can read
@@ -68,9 +68,9 @@ export default function Home() {
             <div className="focused-issue-meta">
               <span>API-342</span>
               <i />
-              <span>HIGH</span>
+              <span>High</span>
               <i />
-              <span>TODO</span>
+              <span>Todo</span>
             </div>
             <h2>Retry failed webhook deliveries</h2>
             <p>
@@ -102,12 +102,12 @@ export default function Home() {
           <footer className="focused-result">
             <div className="focused-result-math">
               <span>
-                <small>AVERAGE</small>
+                <small>Average</small>
                 <b>3.7</b>
               </span>
               <ArrowRight aria-hidden="true" size={18} />
               <span>
-                <small>ESTIMATE</small>
+                <small>Estimate</small>
                 <b>4</b>
               </span>
             </div>
@@ -122,7 +122,7 @@ export default function Home() {
         aria-labelledby="landing-process-title"
       >
         <div>
-          <p className="landing-process-label">HOW A SESSION WORKS</p>
+          <p className="landing-process-label">How a session works</p>
           <h2 id="landing-process-title">
             From your Linear cycle to a pointing session.
           </h2>

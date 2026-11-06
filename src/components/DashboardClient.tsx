@@ -120,7 +120,7 @@ export function DashboardClient({
       <section className="dashboard-main">
         <div className="dashboard-welcome">
           <div>
-            <p className="step-label">LINEAR PLANNING POKER</p>
+            <p className="step-label">Pointing poker for Linear</p>
             <h1>Pointing sessions</h1>
           </div>
           {!creating && <button

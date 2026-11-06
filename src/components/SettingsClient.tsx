@@ -3,10 +3,6 @@ import {
   ArrowLeft,
   Check,
   ExternalLink,
-  Monitor,
-  Moon,
-  Palette,
-  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -31,25 +27,21 @@ const themeOptions = [
     id: "system",
     name: "System",
     description: "Match this device",
-    icon: Monitor,
   },
   {
     id: "light",
     name: "Light",
     description: "Always use light mode",
-    icon: Sun,
   },
   {
     id: "dark",
     name: "Dark",
     description: "Always use dark mode",
-    icon: Moon,
   },
 ] satisfies Array<{
   id: ThemePreference;
   name: string;
   description: string;
-  icon: typeof Monitor;
 }>;
 
 export function SettingsClient({
@@ -155,7 +147,7 @@ export function SettingsClient({
       <section className="settings-main">
         <div className="settings-intro">
           <div>
-            <p className="step-label">TEAM WORKFLOW</p>
+            <p className="step-label">Team workflow</p>
             <h1>Settings</h1>
             <p>
               Manage your Linear connection, team defaults, and appearance.
@@ -285,9 +277,6 @@ export function SettingsClient({
             <SlackConnection notice={slackNotice} />
             <section className="settings-card" id="appearance">
               <div className="settings-card-heading">
-                <span className="settings-icon purple">
-                  <Palette size={18} />
-                </span>
                 <div>
                   <h2>Appearance</h2>
                   <p>
@@ -301,7 +290,6 @@ export function SettingsClient({
                 aria-label="Color mode"
               >
                 {themeOptions.map((option) => {
-                  const Icon = option.icon;
                   const selected = themePreference === option.id;
 
                   return (
@@ -313,10 +301,9 @@ export function SettingsClient({
                       type="button"
                     >
                       <span>
-                        <Icon size={19} />
+                        <b>{option.name}</b>
+                        <small>{option.description}</small>
                       </span>
-                      <b>{option.name}</b>
-                      <small>{option.description}</small>
                       <i aria-hidden="true">
                         {selected && <Check size={13} />}
                       </i>

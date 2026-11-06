@@ -1402,7 +1402,7 @@ function LiveRoomContent({
       <section className="room-grid">
         <aside className="room-queue">
           <div className="pane-heading">
-            <span>AGENDA</span>
+            <span>Agenda</span>
             <div className="agenda-heading-actions">
               <b>{snapshot.queue.length}</b>
               {isFacilitator &&
@@ -1524,7 +1524,7 @@ function LiveRoomContent({
                 <h1>{viewedItem.title}</h1>
                 <div className="issue-tags">
                   {viewedItem.projectName && (
-                    <span className="issue-project-tag">
+                    <span className="issue-context">
                       Project · {viewedItem.projectName}
                     </span>
                   )}
@@ -1532,7 +1532,7 @@ function LiveRoomContent({
                     <span key={label}>{label}</span>
                   ))}
                   {viewedItem.assigneeName && (
-                    <span>Owner · {viewedItem.assigneeName}</span>
+                    <span className="issue-context">Owner · {viewedItem.assigneeName}</span>
                   )}
                 </div>
                 {figmaAttachments.length > 0 && (
@@ -1726,7 +1726,7 @@ function LiveRoomContent({
         <aside className={`room-team ${teamExpanded ? "team-expanded" : ""} ${snapshot.status === "ended" ? "team-ended" : ""}`}>
           <button className="mobile-team-toggle" type="button" aria-expanded={teamExpanded} aria-controls="room-participants" onClick={() => setTeamExpanded(!teamExpanded)}><Users size={16} /> Team · {snapshot.participants.length}{activeItem ? ` · ${snapshot.participants.filter(p => p.hasVoted).length} voted` : ""}</button>
           <div className="pane-heading">
-            <span>TEAM</span>
+            <span>Team</span>
             <b>
               <Users size={13} /> {snapshot.participants.length}
             </b>
@@ -1758,7 +1758,7 @@ function LiveRoomContent({
               {revealed ? (
                 <>
                   <div className="result-label">
-                    <span>FINAL ESTIMATE</span>
+                    <span>Final estimate</span>
                     {averageResult && <small>Average {formatAverage(averageResult.average)}</small>}
                   </div>
                   <div className="final-values">
@@ -1855,7 +1855,7 @@ function WaitingRoom({
   return (
     <div className="waiting-room">
       <span><PointedMark size={30} /></span>
-      <p className="step-label">WAITING ROOM</p>
+      <p className="step-label">Waiting room</p>
       <h1>{title}</h1>
       <p>
         {participantCount} {participantCount === 1 ? "person is" : "people are"}{" "}
