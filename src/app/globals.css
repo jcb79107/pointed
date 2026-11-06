@@ -8731,30 +8731,25 @@ h3,
 }
 
 .analytics-choice {
-  position: fixed;
-  z-index: 100;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
-  max-width: 760px;
-  margin-inline: auto;
-  padding: 20px;
+  flex-shrink: 0;
+  padding: 16px max(24px, calc((100vw - 1120px) / 2));
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   color: var(--ink);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgb(0 0 0 / 12%);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
   font-size: 14px;
 }
-.analytics-choice p { margin: 6px 0 0; line-height: 1.5; }
-.analytics-choice a { text-decoration: underline; }
+.analytics-choice strong { font-weight: 600; }
+.analytics-choice p { margin: 4px 0 0; line-height: 1.5; }
+.analytics-choice a { text-decoration: underline; text-underline-offset: 3px; }
 .analytics-actions { display: flex; flex-shrink: 0; gap: 8px; }
 .analytics-actions .button { min-height: 44px; }
-.analytics-preferences { position: static; margin: 24px auto; max-width: min(760px, calc(100% - 32px)); }
-@media (max-width: 640px) {
+.analytics-preferences { margin: 24px 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; }
+body:has(.landing-shell) > .analytics-choice { background: #141516; color: #f7f8f8; border-color: #23252a; }
+body:has(.landing-shell) > .analytics-choice .button { background: #18191a; color: #f7f8f8; border-color: #34343a; }
+@media (max-width: 700px) {
   .analytics-choice { flex-direction: column; align-items: stretch; padding: 16px; gap: 12px; }
   .analytics-actions .button { flex: 1; }
 }

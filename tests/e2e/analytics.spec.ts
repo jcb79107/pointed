@@ -34,3 +34,23 @@ test('Clarity requires consent, remembers decline, and stops on withdrawal', asy
   await expect(controls).toBeVisible();
   expect(requests).toBe(1);
 });
+
+test('analytics choice never covers room controls and preferences stay with privacy content', async ({ page }) => {
+  test.skip(!process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID, 'Requires isolated Clarity configuration');
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/demo');
+  const controls = page.getByRole('complementary', { name: 'Session analytics' });
+  await expect(controls).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Retry failed webhook deliveries', exact: true })).toBeVisible();
+  const layout = await page.evaluate(() => {
+    const notice = document.querySelector('.analytics-choice')!.getBoundingClientRect();
+    const room = document.querySelector('.room-shell')!.getBoundingClientRect();
+    return { separated: notice.bottom <= room.top, overflow: document.documentElement.scrollWidth > innerWidth };
+  });
+  expect(layout).toEqual({ separated: true, overflow: false });
+  await page.getByRole('button', { name: 'Reveal early', exact: true }).click();
+  await expect(page.locator('.final-values')).toBeVisible();
+  await page.goto('/privacy');
+  await expect(page.locator('article .analytics-preferences')).toBeVisible();
+  await expect(controls).toHaveCount(1);
+});

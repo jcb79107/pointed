@@ -52,7 +52,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col" data-clarity-mask="true">{children}<SessionAnalytics /></body>
+      <body className="min-h-full flex flex-col" data-clarity-mask="true"><SessionAnalytics />{children}</body>
     </html>
   );
 }

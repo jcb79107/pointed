@@ -9,11 +9,12 @@ There is no private API key in the client. Removing the value and rebuilding
 removes the controls and integration.
 
 `SessionAnalytics` loads the vendor script only after explicit consent. Declining
-persists locally. The Privacy page exposes the choice again. Withdrawal sends
+persists locally. The notice stays in document flow so it does not cover room controls.
+The Privacy article exposes the choice again beside its analytics explanation. Withdrawal sends
 consent denial and stops capture; it does not erase already uploaded data.
 Storage failures do not grant permission. Cross-tab changes are respected.
 
-The project uses Strict masking, cookies off by default, and bot filtering.
+Use Strict masking, cookies off by default, and bot filtering in the project settings.
 The root body also sets `data-clarity-mask="true"`. Cookie consent grants analytics
 storage only, never advertising storage. No custom user identification is sent.
 Clarity still receives page addresses, device data, and masked interactions;

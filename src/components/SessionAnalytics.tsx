@@ -25,14 +25,14 @@ function subscribe(callback: () => void) {
   };
 }
 
-export function SessionAnalytics() {
+export function SessionAnalytics({ preferences = false }: { preferences?: boolean }) {
   const projectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
   const choice = useSyncExternalStore(subscribe, readChoice, () => null);
   const pathname = usePathname();
   const [storageError, setStorageError] = useState(false);
 
   useEffect(() => {
-    if (!projectId || !/^[a-z0-9]+$/.test(projectId)) return;
+    if (preferences || !projectId || !/^[a-z0-9]+$/.test(projectId)) return;
     if (choice !== "allowed") {
       window.clarity?.("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" });
       window.clarity?.("stop");
@@ -51,7 +51,7 @@ export function SessionAnalytics() {
     script.async = true;
     script.src = `https://www.clarity.ms/tag/${projectId}`;
     document.head.appendChild(script);
-  }, [choice, projectId]);
+  }, [choice, projectId, preferences]);
 
   function choose(value: Exclude<Choice, null>) {
     try {
@@ -61,11 +61,11 @@ export function SessionAnalytics() {
     } catch { setStorageError(true); }
   }
 
-  if (!projectId || !/^[a-z0-9]+$/.test(projectId) || (choice && pathname !== "/privacy")) return null;
-  return <aside className={`analytics-choice${pathname === "/privacy" ? " analytics-preferences" : ""}`} aria-label="Session analytics">
-    <div><strong>Help improve Pointed</strong>
-      <p>Allow Microsoft Clarity to record masked sessions, clicks, and pages visited? Optional analytics cookies connect visits. <Link href="/privacy">Privacy details</Link></p>
-      {pathname === "/privacy" && <p role="status">Session analytics: {choice === "allowed" ? "on" : "off"}. You can change this anytime.</p>}
+  if (!projectId || !/^[a-z0-9]+$/.test(projectId) || (!preferences && (choice || pathname === "/privacy"))) return null;
+  return <aside className={`analytics-choice${preferences ? " analytics-preferences" : ""}`} aria-label="Session analytics">
+    <div><strong>{preferences ? "This browser" : "Optional session analytics"}</strong>
+      {!preferences && <p>Allow Microsoft Clarity to record masked sessions, clicks, and pages visited? Optional analytics cookies connect visits. <Link href="/privacy">Privacy details</Link></p>}
+      {preferences && <p role="status">Session analytics: {choice === "allowed" ? "on" : "off"}. You can change this anytime.</p>}
       {storageError && <p role="alert">Your browser could not save this choice. Session analytics stays off unless you previously allowed it.</p>}
     </div>
     <div className="analytics-actions">

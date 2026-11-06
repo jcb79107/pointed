@@ -163,3 +163,11 @@ Start session are grouped after the agenda. Destructive draft management is sepa
 Mobile team visibility uses a labeled disclosure, never silent removal of the roster.
 Completed rooms retain history without editable roles or pending-vote indicators.
 The landing illustration follows the dark marketing surface; app themes remain unchanged.
+
+## Analytics consent
+
+Keep optional analytics choices in normal document flow above the app so they
+never cover voting or facilitator controls. Use equal-weight, 44px actions and
+the existing neutral surfaces. The marketing notice follows the dark landing
+surface. Persistent preferences belong inside the Privacy article next to the
+analytics explanation, not in a separate floating card.
