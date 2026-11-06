@@ -4,7 +4,7 @@ import type { SessionSnapshot } from '../../src/lib/domain';
 const fixture = 'http://127.0.0.1:3005';
 
 test('saved notices expire, replacements get a fresh timer, and dismissal works by keyboard', async ({ page, request }) => {
-  const snapshot: SessionSnapshot = await (await request.get(`${fixture}/fixture-snapshot`)).json();
+  const snapshot: SessionSnapshot = (await (await request.get(`${fixture}/api/fixture-snapshot`)).json()).snapshot;
   await page.route('**/api/**', route => route.fulfill({ json: { snapshot } }));
   await page.route('**/api/sessions/*/actions', route => {
     const { action } = route.request().postDataJSON();
@@ -31,7 +31,7 @@ test('saved notices expire, replacements get a fresh timer, and dismissal works 
 });
 
 test('summary contents and revisit buttons remain inset with no horizontal overflow', async ({ page, request }, testInfo) => {
-  const snapshot: SessionSnapshot = await (await request.get(`${fixture}/fixture-snapshot`)).json();
+  const snapshot: SessionSnapshot = (await (await request.get(`${fixture}/api/fixture-snapshot`)).json()).snapshot;
   snapshot.status = 'ended';
   snapshot.activeItemId = null;
   snapshot.round = null;
@@ -53,7 +53,7 @@ test('summary contents and revisit buttons remain inset with no horizontal overf
 });
 
 test('estimate conflicts require explicit confirmation and failed overwrites are not retried', async ({ page, request }) => {
-  const snapshot: SessionSnapshot = await (await request.get(`${fixture}/fixture-snapshot`)).json();
+  const snapshot: SessionSnapshot = (await (await request.get(`${fixture}/api/fixture-snapshot`)).json()).snapshot;
   const saves: unknown[] = [];
   await page.route('**/api/**', route => route.fulfill({ json: { snapshot } }));
   await page.route('**/api/sessions/*/actions', route => {
