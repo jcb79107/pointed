@@ -76,8 +76,11 @@ test("confirmed action denial prevents a late successful poll from restoring the
   }));
   await page.route("**/api/sessions/demo-session/actions", route =>
     route.fulfill({ status: 403, json: denied }));
-  await page.clock.runFor(5_100);
-  await expect.poll(() => Boolean(releasePoll)).toBe(true);
+  // The server-rendered room can appear before the polling effect is registered.
+  await expect.poll(async () => {
+    await page.clock.runFor(1_000);
+    return Boolean(releasePoll);
+  }).toBe(true);
   await page.getByRole("button", { name: "Reveal early", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Room access ended" })).toBeVisible();
   await releasePoll!();
