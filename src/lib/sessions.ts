@@ -56,6 +56,7 @@ import { broadcastSessionChanged } from "@/lib/realtime";
 import {
   canFacilitate,
   nextPendingItemId,
+  StaleRoundError,
   shouldAddNewVoterToRound,
   shouldAutoReveal,
   voteValueForViewer,
@@ -1428,9 +1429,14 @@ export async function finalizeEstimate(input: {
   userId: string;
   estimate: number;
   overwrite?: boolean;
+  // shortcut: optional for older clients, require once all clients send round identity.
+  expectedRoundId?: string;
 }) {
   const { session } = await requireFacilitator(input.sessionId, input.userId);
-  if (!session.activeQueueItemId) throw new Error("No active issue");
+  if (!session.activeQueueItemId) {
+    if (input.expectedRoundId) throw new StaleRoundError();
+    throw new Error("No active issue");
+  }
   const [item] = await db
     .select()
     .from(queueItems)
@@ -1447,6 +1453,9 @@ export async function finalizeEstimate(input: {
     )
     .orderBy(desc(rounds.createdAt))
     .limit(1);
+  if (input.expectedRoundId && round?.id !== input.expectedRoundId) {
+    throw new StaleRoundError();
+  }
   if (!item || !round) throw new Error("Reveal the round before finalizing");
 
   if (!isFinalizableEstimate(input.estimate, session.pointingCards)) {
@@ -1466,6 +1475,9 @@ export async function finalizeEstimate(input: {
         .from(rounds)
         .where(eq(rounds.id, round.id))
         .limit(1);
+      if (input.expectedRoundId && lockedRound?.status !== "revealed") {
+        throw new StaleRoundError();
+      }
       if (!lockedRound || lockedRound.status === "finalized") return false;
       if (lockedRound.status !== "revealed") {
         throw new Error("Round is no longer ready to finalize");

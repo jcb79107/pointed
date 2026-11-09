@@ -28,6 +28,7 @@ const actionSchema = z.discriminatedUnion("action", [
     action: z.literal("finalize"),
     estimate: z.number().int().nonnegative(),
     overwrite: z.boolean().optional(),
+    expectedRoundId: z.string().uuid().optional(),
   }),
   z.object({
     action: z.literal("participant-role"),
@@ -78,6 +79,7 @@ export async function POST(
           userId: user.id,
           estimate: input.estimate,
           overwrite: input.overwrite,
+          expectedRoundId: input.expectedRoundId,
         });
         break;
       case "participant-role":

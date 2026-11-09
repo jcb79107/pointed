@@ -189,3 +189,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [release
 The hosted app uses Sentry for privacy-filtered errors and optional user feedback.
 Feedback supports optional screenshot attachments. Recording starts only after the user chooses to record, stays local, and is uploaded only when they submit with “Attach my recording” selected. Canceling discards it. Self-hosted installs can opt in using the
 variables in `.env.example`; see [Sentry setup and data boundaries](docs/launch/SENTRY.md).
+
+## State and transitions
+
+See the [state-machine map](docs/architecture/state-machines.md) for application
+states, transition owners, recovery rules, concurrency limits, and test entry points.
+
+See [UI audit fixes and regression evidence](docs/architecture/ui-audit-fixes.md)
+for the responsive, accessibility, and state-feedback improvements.

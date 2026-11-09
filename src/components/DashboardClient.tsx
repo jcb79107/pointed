@@ -98,7 +98,7 @@ export function DashboardClient({
   return (
     <main className="dashboard-shell">
       <header className="app-header">
-        <Brand />
+        <Brand href="/sessions" />
         <div className="header-user">
           <FeedbackButton compact />
           <span>{initials(user.name)}</span>

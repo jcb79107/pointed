@@ -9,9 +9,20 @@ import type { SessionSnapshot } from "@/lib/domain";
 export default async function Fixture({
   searchParams,
 }: {
-  searchParams: Promise<{ screen?: string }>;
+  searchParams: Promise<{ screen?: string; scenario?: string }>;
 }) {
-  const { screen } = await searchParams;
+  const { screen, scenario } = await searchParams;
+  const room: SessionSnapshot = structuredClone(demoSnapshot);
+  if (scenario === "long") {
+    room.title = "A long session name that must remain readable";
+    room.queue[0].description = "Long issue context.\n\n".repeat(90);
+  }
+  if (scenario === "waiting") {
+    room.participants = room.participants.filter(p => p.id === room.currentUserId);
+    room.participants[0].votingEnabled = false;
+    room.round!.eligibleVoterIds = [];
+    room.queue[0].elapsedSeconds = 59 * 3600;
+  }
   const draft: SessionSnapshot = {
     ...demoSnapshot,
     status: "draft",
@@ -34,7 +45,7 @@ export default async function Fixture({
         Local preview · Synthetic tickets and accounts
       </aside>
       {screen === "live" || screen === "room" ? (
-        <LiveRoom initialSnapshot={demoSnapshot} />
+        <LiveRoom initialSnapshot={room} />
       ) : screen === "settings" ? (
         <SettingsClient
           user={{ name: "Richard Hendricks", email: "richard@example.test" }}

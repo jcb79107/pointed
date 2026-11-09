@@ -38,9 +38,9 @@ export function PointedMark({
   );
 }
 
-export function Brand({ compact = false }: { compact?: boolean }) {
+export function Brand({ compact = false, href = "/" }: { compact?: boolean; href?: string }) {
   return (
-    <Link aria-label="Pointed home" className="brand" href="/">
+    <Link aria-label={href === "/sessions" ? "Pointed sessions" : "Pointed home"} className="brand" href={href}>
       <Image
         alt=""
         aria-hidden="true"

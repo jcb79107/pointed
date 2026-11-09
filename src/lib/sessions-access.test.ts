@@ -627,3 +627,43 @@ describe.each(["voter", "host"] as const)("current team-access enforcement for %
     }
   });
 });
+
+
+describe("finalization round identity", () => {
+  it.each([false, true])("rejects a stale round even with overwrite=%s", async (overwrite) => {
+    const { host, session, roundId } = await liveSession();
+    await asUser(host);
+    await responseSnapshot(await act(session.id, { action: "reveal" }));
+    await responseSnapshot(await act(session.id, { action: "revote" }));
+    const before = await responseSnapshot(await act(session.id, { action: "reveal" }));
+    mocks.issue.mockClear();
+    const response = await act(session.id, {
+      action: "finalize", estimate: 2, expectedRoundId: roundId, overwrite,
+    });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: "STALE_ROUND" });
+    expect(mocks.writeEstimate).not.toHaveBeenCalled();
+    expect(mocks.issue).not.toHaveBeenCalled();
+    expect(await responseSnapshot(await readSnapshot(session.id))).toEqual(before);
+  });
+
+  it("accepts the current round and rejects a repeat after completion", async () => {
+    const { host, session, roundId } = await liveSession();
+    await asUser(host);
+    await responseSnapshot(await act(session.id, { action: "reveal" }));
+    const command = { action: "finalize", estimate: 2, expectedRoundId: roundId };
+    expect((await responseSnapshot(await act(session.id, command))).status).toBe("ended");
+    const repeated = await act(session.id, command);
+    expect(repeated.status).toBe(409);
+    expect(await repeated.json()).toMatchObject({ code: "STALE_ROUND" });
+    expect(mocks.writeEstimate).toHaveBeenCalledExactlyOnceWith(host.id, issue.id, 2);
+  });
+
+  it("validates the round identity before calling the provider", async () => {
+    const { host, session } = await liveSession();
+    await asUser(host);
+    const response = await act(session.id, { action: "finalize", estimate: 2, expectedRoundId: "invalid" });
+    expect(response.status).toBe(400);
+    expect(mocks.writeEstimate).not.toHaveBeenCalled();
+  });
+});

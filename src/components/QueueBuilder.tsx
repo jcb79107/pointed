@@ -239,7 +239,7 @@ export function QueueBuilder({
   return (
     <main className="prepare-shell">
       <header className="app-header">
-        <Brand />
+        <Brand href="/sessions" />
         <div className="prepare-header-actions">
           <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions
@@ -252,6 +252,7 @@ export function QueueBuilder({
           <div>
             <p className="step-label">{snapshot.teamName}</p>
             <h1>Preview your agenda</h1>
+            <p className="prepare-session-name">{snapshot.title}</p>
             <p className="prepare-help">
               Prepare the tickets in Linear. Review the order here, then bring
               in the team.
@@ -425,6 +426,7 @@ export function QueueBuilder({
           />
           <button
             className="button button-primary"
+            aria-describedby={!queue.length || sourceChanged ? "start-session-help" : undefined}
             disabled={Boolean(busy) || !queue.length || Boolean(sourceChanged)}
             onClick={start}
             type="button"
@@ -433,6 +435,7 @@ export function QueueBuilder({
             <ArrowRight size={16} />
           </button>
         </div>
+        {(!queue.length || sourceChanged) && <p id="start-session-help" role="status">{sourceChanged ? "Load the selected cycle before starting." : "Load at least one ticket to start. Invitees can join the waiting room while you prepare."}</p>}
         <div className="draft-management">
           <button
             className="button button-ghost"
