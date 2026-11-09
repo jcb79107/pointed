@@ -1,10 +1,15 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+if (process.env.CI && process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID !== 'uitest') {
+  throw new Error('CI analytics coverage requires NEXT_PUBLIC_CLARITY_PROJECT_ID=uitest for both build and tests.');
+}
+
 test('Clarity requires consent, remembers decline, and stops on withdrawal', async ({ page }, testInfo) => {
   test.skip(!process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID, 'Requires isolated Clarity configuration');
   let requests = 0;
   await page.route('https://www.clarity.ms/**', route => {
+    expect(route.request().url()).toBe(`https://www.clarity.ms/tag/${process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID}`);
     requests++;
     return route.fulfill({ contentType: 'application/javascript', body: `
       window.clarityCalls = [...(window.clarity.q || [])];
