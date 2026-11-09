@@ -58,7 +58,7 @@ import {
   figmaPreviewTitle,
   isFigmaUrl,
 } from "@/lib/figma";
-import { roundedUpAverageVote } from "@/lib/rounds";
+import { STALE_ROUND, roundedUpAverageVote } from "@/lib/rounds";
 import { shouldClearRoom } from "@/lib/room-access";
 import { accumulatedElapsedSeconds } from "@/lib/timing";
 
@@ -219,6 +219,9 @@ function LiveRoomContent({
   }, [checkRoomAccess]);
   const [roomSnapshot, setSnapshot] = useState(initialSnapshot);
   const [teamExpanded, setTeamExpanded] = useState(false);
+  const [actionsExpanded, setActionsExpanded] = useState(false);
+  const actionsTrigger = useRef<HTMLButtonElement>(null);
+  const voteDock = useRef<HTMLDivElement>(null);
   // Demo role navigation changes the viewer, not the simulated session.
   const snapshot = demoMode ? {
     ...roomSnapshot,
@@ -841,6 +844,10 @@ function LiveRoomContent({
       }
       return;
     }
+    // Keep the original round on conflict confirmation, even after a room refresh.
+    const commandPayload = actionName === "finalize"
+      ? { expectedRoundId: snapshot.round?.id, ...payload }
+      : payload;
     setBusy(true);
     try {
       const { data, response } = await requestRoomJson<RoomApiResponse>(
@@ -850,13 +857,19 @@ function LiveRoomContent({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: actionName,
-            ...payload,
+            ...commandPayload,
             ...(overwrite ? { overwrite: true } : {}),
           }),
         },
       );
+      if (response.status === 409 && data.code === STALE_ROUND) {
+        setConflict(null);
+        setFinalEstimate(null);
+        await refresh();
+        throw new Error(data.error ?? "The voting round changed. Review it before saving again.");
+      }
       if (response.status === 409 && !overwrite) {
-        setConflict({ action: actionName, payload, message: data.error ?? "This estimate changed in Linear." });
+        setConflict({ action: actionName, payload: commandPayload, message: data.error ?? "This estimate changed in Linear." });
         return;
       }
       if (!response.ok) {
@@ -1120,7 +1133,7 @@ function LiveRoomContent({
     >
       <header className="room-header">
         <div className="room-title">
-          <Brand compact />
+          <Brand compact href={demoMode ? "/" : "/sessions"} />
           <Link aria-label="Back to sessions" href="/sessions">
             <ArrowLeft size={15} />
           </Link>
@@ -1146,10 +1159,11 @@ function LiveRoomContent({
           <ElapsedTimer
             activeStartedAt={snapshot.activeStartedAt}
             baseSeconds={snapshot.elapsedSeconds}
-            label="Total"
+            label="Session elapsed"
           />
         </div>
-        <div className="room-actions">
+        <button ref={actionsTrigger} type="button" className="room-actions-toggle" aria-expanded={actionsExpanded} aria-controls="room-actions" onClick={() => setActionsExpanded(!actionsExpanded)}>Actions</button>
+        <div id="room-actions" className={`room-actions ${actionsExpanded ? "actions-expanded" : ""}`} onKeyDown={(event) => { if (event.key === "Escape" && !(event.target as HTMLElement).closest("dialog, [role=dialog]")) { setActionsExpanded(false); actionsTrigger.current?.focus(); } }}>
           <FeedbackButton compact />
           <button
             aria-expanded={shortcutsOpen}
@@ -1196,7 +1210,7 @@ function LiveRoomContent({
           {isFacilitator && !demoMode && (
             <button
               aria-label="Delete session"
-              className="icon-button"
+              className="icon-button delete-session-button"
               disabled={busy}
               onClick={() => setConfirmTarget({ type: "delete-session" })}
               title="Delete session"
@@ -1286,9 +1300,13 @@ function LiveRoomContent({
                 <X size={17} />
               </button>
             </div>
+            <label htmlFor="linear-ticket-search">Search Linear tickets</label>
+            <p id="ticket-search-scope" className="search-scope">{snapshot.teamName} · {snapshot.intake?.cycleOffset === "backlog" ? "No cycle" : snapshot.intake?.cycleId ? snapshot.intake.name : "All cycles"} · Unestimated · Backlog, todo, in progress, and triage · Any assignee. Tickets already in the agenda are hidden. <Link href="/support#missing-tickets" target="_blank">Why tickets may be missing</Link></p>
             <div className="issue-picker-search">
               <Search size={17} />
               <input
+                id="linear-ticket-search"
+                aria-describedby="ticket-search-scope"
                 autoFocus
                 onChange={(event) => setAddIssueQuery(event.target.value)}
                 onKeyDown={(event) => {
@@ -1332,8 +1350,8 @@ function LiveRoomContent({
                     {addQueuedMatch
                       ? `${addQueuedMatch.identifier} is already part of this session.`
                       : addIssueHasSearched
-                        ? "Try another title or ticket ID."
-                        : "Search by title or ticket ID using your saved ticket filters."}
+                        ? "Try another title or ticket ID, or check the filters above. To change the cycle, prepare a new session from Sessions."
+                        : "Search by title or ticket ID within the filters above."}
                   </p>
                 </div>
               ) : (
@@ -1486,6 +1504,7 @@ function LiveRoomContent({
         </aside>
 
         <section className="room-issue" ref={issuePaneRef}>
+          {activeItem && !browsing && <button className="jump-to-voting" type="button" onClick={() => { voteDock.current?.scrollIntoView({ block: "start" }); voteDock.current?.focus({ preventScroll: true }); }}> {revealed ? "Review votes and estimate" : eligibleVoterCount === 0 ? "Waiting for voters · View controls" : canVote ? "Go to your vote" : "View voting controls"}</button>}
           {browsing && <div className="browse-notice" role="status">
             <span>Previewing {viewedItem?.identifier}. The team is on {activeItem?.identifier ?? "the summary"}.</span>
             <div className="browse-actions">
@@ -1619,7 +1638,8 @@ function LiveRoomContent({
                 )}
               </div>
 
-              <div className="vote-dock">
+              <div className="vote-dock" ref={voteDock} tabIndex={-1} aria-label="Voting controls">
+                <p className="elapsed-help">Elapsed time includes waiting while this ticket is open.</p>
                 <div className="vote-dock-head">
                   <div>
                     {revealed ? <Eye size={15} /> : <EyeOff size={15} />}
@@ -1630,7 +1650,7 @@ function LiveRoomContent({
                           ? me?.hasVoted
                             ? "Vote submitted"
                             : "Your vote"
-                          : "Voting in progress"}
+                          : eligibleVoterCount === 0 ? "Waiting for voters" : "Voting in progress"}
                     </b>
                   </div>
                   <span>
@@ -1641,7 +1661,7 @@ function LiveRoomContent({
                       <ElapsedTimer
                         activeStartedAt={activeItem.activeStartedAt}
                         baseSeconds={activeItem.elapsedSeconds}
-                        label="Time"
+                        label="Ticket elapsed"
                       />
                     )}
                   </span>
@@ -1681,7 +1701,8 @@ function LiveRoomContent({
                   eligibleVoterCount === 0 && !revealed ? (
                     <div className="facilitator-wait no-voters">
                       <Users size={18} />
-                      <b>No voters yet</b>
+                      <div><b>No voters yet</b><p>You’re facilitating without voting. Invite teammates or join this round.</p></div>
+                      <button disabled={busy} type="button" onClick={() => void action("participant-role", { participantUserId: snapshot.currentUserId, role: "facilitator", votingEnabled: true, addToCurrentRound: true })}>Join voting</button>
                       <button onClick={copyInvite} type="button">
                         {copied ? <Check size={14} /> : <Copy size={14} />}
                         {copied ? "Copied" : "Copy invite"}

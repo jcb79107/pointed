@@ -1,3 +1,4 @@
+import { openRoomActions } from './helpers/room-actions';
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -20,6 +21,7 @@ test("confirmed access denial clears cached room and dialogs and stops polling",
     polls += 1;
     return route.fulfill({ status: 403, json: denied });
   });
+  await openRoomActions(page);
   await page.getByRole("button", { name: "Delete session", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.clock.runFor(5_100);

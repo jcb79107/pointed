@@ -1,3 +1,4 @@
+import { openRoomActions } from './helpers/room-actions';
 import { test, expect } from '@playwright/test';
 import type { SessionSnapshot } from '../../src/lib/domain';
 
@@ -38,6 +39,7 @@ test('summary contents and revisit buttons remain inset with no horizontal overf
   snapshot.queue = snapshot.queue.map((item, index) => ({ ...item, status: index ? 'skipped' : 'estimated', finalEstimate: index ? null : 2, elapsedSeconds: 368 }));
   await page.route('**/api/**', route => route.fulfill({ json: { snapshot } }));
   await page.goto(`${fixture}/?screen=live`);
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
   for (const row of await page.locator('.summary-item').all()) {
@@ -70,9 +72,51 @@ test('estimate conflicts require explicit confirmation and failed overwrites are
   await page.locator('.final-values').getByRole('button', { name: '2', exact: true }).click();
   await page.getByRole('button', { name: 'Save estimate & next' }).click();
   await expect(page.getByRole('dialog', { name: 'Estimate changed in Linear' })).toBeVisible();
-  expect(saves).toEqual([{ action: 'finalize', estimate: 2 }]);
+  expect(saves).toEqual([{ action: 'finalize', estimate: 2, expectedRoundId: snapshot.round!.id }]);
   await page.getByRole('button', { name: 'Save my estimate' }).click();
   await expect(page.locator('.room-error')).toHaveText('Estimate changed in Linear');
   await expect(page.getByRole('button', { name: 'Save estimate & next' })).toBeEnabled();
-  expect(saves).toEqual([{ action: 'finalize', estimate: 2 }, { action: 'finalize', estimate: 2, overwrite: true }]);
+  expect(saves).toEqual([{ action: 'finalize', estimate: 2, expectedRoundId: snapshot.round!.id }, { action: 'finalize', estimate: 2, expectedRoundId: snapshot.round!.id, overwrite: true }]);
+});
+
+test('conflict confirmation keeps its original round after polling and stale saves refresh without overwrite prompts', async ({ page, request }) => {
+  const snapshot: SessionSnapshot = (await (await request.get(`${fixture}/api/fixture-snapshot`)).json()).snapshot;
+  const originalRoundId = snapshot.round!.id;
+  const saves: Record<string, unknown>[] = [];
+  let refreshes = 0;
+  await page.route('**/api/**', route => {
+    if (route.request().url().endsWith('/snapshot')) refreshes++;
+    return route.fulfill({ json: { snapshot } });
+  });
+  await page.route('**/api/sessions/*/actions', route => {
+    const input = route.request().postDataJSON();
+    if (input.action === 'reveal') snapshot.round!.status = 'revealed';
+    if (input.action === 'finalize') {
+      saves.push(input);
+      return route.fulfill({ status: 409, json: saves.length === 1
+        ? { error: 'Estimate changed in Linear' }
+        : { code: 'STALE_ROUND', error: 'The voting round changed. Review the current ticket and estimate before saving again.' } });
+    }
+    return route.fulfill({ json: { snapshot } });
+  });
+  await page.goto(`${fixture}/?screen=live`);
+  await page.getByRole('button', { name: 'Reveal early' }).click();
+  await page.locator('.final-values').getByRole('button', { name: '2', exact: true }).click();
+  await page.getByRole('button', { name: 'Save estimate & next' }).click();
+  await expect(page.getByRole('dialog', { name: 'Estimate changed in Linear' })).toBeVisible();
+  snapshot.round!.id = 'new-round';
+  snapshot.round!.number += 1;
+  const before = refreshes;
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect.poll(() => refreshes).toBeGreaterThan(before);
+  await expect(page.getByText(`Round ${snapshot.round!.number} ·`, { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Save my estimate' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.room-error')).toContainText('The voting round changed');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  expect(saves).toEqual([
+    { action: 'finalize', estimate: 2, expectedRoundId: originalRoundId },
+    { action: 'finalize', estimate: 2, expectedRoundId: originalRoundId, overwrite: true },
+  ]);
+  await expect.poll(() => refreshes).toBeGreaterThan(before + 1);
 });

@@ -1,3 +1,4 @@
+import { openRoomActions } from './helpers/room-actions';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
@@ -33,6 +34,7 @@ test('reveal, revise a round, and save an explicit estimate', async ({ page }) =
   await expect(page.locator('.final-values').getByRole('button', { name: '2', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Save estimate & next' }).click();
   await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.locator('.summary-list .summary-ticket').first()).toContainText('2');
   await expect(page.locator('.session-summary')).toContainText('1 estimated');
@@ -41,6 +43,7 @@ test('reveal, revise a round, and save an explicit estimate', async ({ page }) =
 test('finish and resume without losing the remaining tickets', async ({ page }) => {
   await page.goto('/demo');
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await page.getByRole('button', { name: 'Resume 2 remaining' }).click();
   await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
@@ -67,6 +70,7 @@ test('clipboard failure gives a selectable summary', async ({ page }) => {
     value: { writeText: () => Promise.reject(new DOMException('Permission denied', 'NotAllowedError')) },
   }));
   await page.goto('/demo');
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await page.getByRole('button', { name: 'Copy summary' }).click();
   await expect(page.getByRole('alert').filter({ hasText: 'Could not copy' })).toBeVisible();
@@ -119,6 +123,7 @@ for (const theme of ['light', 'dark'] as const) {
         await page.locator('.final-values').getByRole('button', { name: '2', exact: true }).click();
         await page.getByRole('button', { name: 'Save estimate & next' }).click();
         await page.getByRole('button', { name: 'Skip', exact: true }).click();
+        await openRoomActions(page);
         await page.getByRole('button', { name: 'Finish for now' }).click();
       }
       const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
@@ -131,6 +136,7 @@ for (const theme of ['light', 'dark'] as const) {
 test('phone header actions remain recognizable', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto('/demo');
+  await openRoomActions(page);
   const finish = page.getByRole('button', { name: 'Finish for now' });
   await expect(finish).toBeVisible();
   const icon = await finish.locator('svg').boundingBox();
@@ -165,6 +171,7 @@ test('participant browses ahead without moving the room or voting on the wrong t
 test('skipped tickets can be revisited from the summary', async ({ page }) => {
   await page.goto('/demo');
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.locator('.session-summary-heading')).toContainText('1 skipped');
   await page.getByRole('button', { name: 'Revisit API-342' }).click();
@@ -183,12 +190,12 @@ test('visible role switch opens a complete participant demo', async ({ page }) =
 test('demo timer starts fresh on every visit and on the next ticket', async ({ page }) => {
   await page.goto('/demo');
   const timer = page.locator('.vote-dock .elapsed-timer');
-  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
-  await expect(timer).toHaveText(/^Time 0:0[3-9]$/, { timeout: 10000 });
+  await expect(timer).toHaveText(/^Ticket elapsed 0:0[0-2]$/);
+  await expect(timer).toHaveText(/^Ticket elapsed 0:0[3-9]$/, { timeout: 10000 });
   await page.reload();
-  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
+  await expect(timer).toHaveText(/^Ticket elapsed 0:0[0-2]$/);
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
-  await expect(timer).toHaveText(/^Time 0:0[0-2]$/);
+  await expect(timer).toHaveText(/^Ticket elapsed 0:0[0-2]$/);
   await expect(page.locator('.queue-footer')).toHaveCount(0);
   await expect(page.getByText('You facilitate; the team points.')).toHaveCount(0);
 });
@@ -197,6 +204,7 @@ test('demo timer starts fresh on every visit and on the next ticket', async ({ p
   await page.goto('/demo');
   await expect(page.getByRole('button', { name: 'Refresh ticket preview from Linear' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Open in Linear' })).toHaveCount(0);
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.locator('.summary-list')).toBeVisible();
   await expect(page.locator('.summary-list a')).toHaveCount(0);
@@ -217,6 +225,7 @@ test('demo role switching preserves votes, progress, and results through browser
   await page.getByRole('link', { name: 'Participant', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Add workspace usage limits', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Facilitator', exact: true }).click();
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await page.getByRole('link', { name: 'Participant', exact: true }).click();
   await expect(page.locator('.session-summary')).toContainText('1 estimated');

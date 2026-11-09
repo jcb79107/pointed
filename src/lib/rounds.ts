@@ -4,6 +4,15 @@ import type {
   RoundStatus,
 } from "@/lib/domain";
 
+export const STALE_ROUND = "STALE_ROUND";
+
+export class StaleRoundError extends Error {
+  constructor() {
+    super("The voting round changed. Review the current ticket and estimate before saving again.");
+    this.name = "StaleRoundError";
+  }
+}
+
 export function shouldAutoReveal(
   eligibleVoterIds: readonly string[],
   votedUserIds: readonly string[],

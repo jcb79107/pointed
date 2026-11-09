@@ -9,6 +9,9 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const form = useRef<HTMLFormElement>(null);
+  const messageInput = useRef<HTMLTextAreaElement>(null);
+  const messageErrorId = useId();
+  const [messageInvalid, setMessageInvalid] = useState(false);
   const titleId = useId();
   const noticeId = useId();
   const recordingRequest = useRef<AbortController | null>(null);
@@ -52,10 +55,14 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
     if (busy) return;
     const data = new FormData(event.currentTarget);
     const message = String(data.get("message") ?? "").trim();
-    if (!message) { setError("Tell us what happened or what you’d change."); return; }
+    if (!message) { setMessageInvalid(true); setError(""); messageInput.current?.focus(); return; }
+    setMessageInvalid(false);
     const emailInput = event.currentTarget.elements.namedItem("email") as HTMLInputElement;
     if (!emailInput.validity.valid) {
       setError("Enter a valid email address in Add details, or leave it blank.");
+      const details = emailInput.closest("details");
+      if (details) details.open = true;
+      emailInput.focus();
       return;
     }
     setBusy(true);
@@ -80,7 +87,8 @@ export function FeedbackButton({ compact = false }: { compact?: boolean }) {
     <dialog onClose={() => trigger.current?.focus()} ref={dialog} className="feedback-dialog" aria-labelledby={titleId} aria-describedby={noticeId} onCancel={(event) => { event.preventDefault(); if (!busy) void cancel(); }} data-sentry-block>
       <form noValidate ref={form} onSubmit={submit}>
         <h2 id={titleId}>Send feedback</h2>
-        <label>What happened, or what would you change?<textarea name="message" required maxLength={5000} rows={5} /></label>
+        <label>What happened, or what would you change?<textarea ref={messageInput} name="message" required maxLength={5000} rows={5} aria-invalid={messageInvalid || undefined} aria-describedby={messageInvalid ? messageErrorId : undefined} onChange={() => { if (messageInvalid) setMessageInvalid(false); }} /></label>
+        {messageInvalid && <p id={messageErrorId} className="form-error" role="alert">Tell us what happened or what you’d change.</p>}
         <details className="feedback-details"><summary>Add details (optional)</summary>
         <label><span>Email (optional, for a reply)</span><input name="email" type="email" maxLength={254} autoComplete="email" /></label>
         <label><span>Screenshot (optional)</span><input name="screenshot" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => {

@@ -136,7 +136,7 @@ export function SettingsClient({
       }}
     >
       <header className="app-header settings-header">
-        <Brand />
+        <Brand href="/sessions" />
         <div className="settings-header-actions">
           <Link className="button button-ghost" aria-label="Sessions" href="/sessions">
             <ArrowLeft size={16} /> Sessions

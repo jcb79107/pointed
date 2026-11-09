@@ -50,7 +50,7 @@ export function SlackConnection({ notice }: { notice?: string }) {
     {loaded && <>
       <p>{destination ? <>Connected to <strong>{destination.workspaceName} · {destination.channelName}</strong>{destination.source === "manual" && " (names supplied during webhook setup)"}.</> : "No Slack channel connected. Copying invite links still works."}</p>
       <div className="slack-settings-actions">
-        {oauthAvailable ? <a className="button button-primary" href="/api/auth/slack/start">{destination ? "Change Slack channel" : "Connect Slack"}</a> : <p>Copy a session invite link to share it in Slack, or use the advanced connection below.</p>}
+        {oauthAvailable ? <a className="button button-primary" href="/api/auth/slack/start">{destination ? "Change Slack channel" : "Connect Slack"}</a> : <p>Slack sign-in is not available on this deployment. Copy an invite link to share it, or set up an incoming webhook below. Setup does not send a message.</p>}
         {destination && <button className="button button-ghost" type="button" disabled={busy} onClick={() => void update("DELETE")}>Disconnect</button>}
       </div>
       {oauthAvailable && <p className="settings-help">Slack will ask you to choose a workspace and channel. Your workspace may require administrator approval. Connecting does not send a message.</p>}

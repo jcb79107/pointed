@@ -1,3 +1,4 @@
+import { openRoomActions } from './helpers/room-actions';
 import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
@@ -47,7 +48,8 @@ test('header title and actions fit across tablet and desktop breakpoints', async
     const layout = await page.locator('.room-header').evaluate(header => {
       const bounds = header.getBoundingClientRect();
       const title = header.querySelector('.room-title')!.getBoundingClientRect();
-      const actions = header.querySelector('.room-actions')!.getBoundingClientRect();
+      const actionElement = header.querySelector('.room-actions-toggle')!;
+      const actions = (actionElement.getBoundingClientRect().width ? actionElement : header.querySelector('.room-actions')!).getBoundingClientRect();
       const label = header.querySelector('.room-title b')!;
       const controls = [...header.querySelectorAll('.room-actions button')].filter(e => e.getBoundingClientRect().width > 0);
       return {
@@ -60,6 +62,7 @@ test('header title and actions fit across tablet and desktop breakpoints', async
     expect(layout, `Header at ${width}px`).toEqual({ titleFits: true, separated: true, controlsFit: true, overflow: 0 });
   }
   await page.setViewportSize({ width: 904, height: 954 });
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now' }).click();
   await expect(page.getByRole('button', { name: 'Resume 3 remaining' })).toBeVisible();
 });
@@ -72,6 +75,7 @@ test('mobile team disclosure shows waiting voters and hides completed controls',
   await team.click();
   await expect(page.getByRole('img', { name: 'Richard Hendricks: waiting for vote', exact: true })).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'Role for Jared Dunn' })).toBeVisible();
+  await openRoomActions(page);
   await page.getByRole('button', { name: 'Finish for now', exact: true }).click();
   await expect(page.getByRole('combobox', { name: 'Role for Jared Dunn' })).toHaveCount(0);
   await expect(page.getByLabel('Browse agenda')).toHaveCount(0);

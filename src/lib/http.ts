@@ -1,5 +1,6 @@
 import { captureException } from "@sentry/nextjs";
 import { ZodError } from "zod";
+import { STALE_ROUND, StaleRoundError } from "@/lib/rounds";
 
 import {
   LINEAR_ACCESS_UNAVAILABLE,
@@ -19,6 +20,12 @@ export function apiError(error: unknown): Response {
     return Response.json(
       { error: "Unable to verify Linear access. Try again.", code: LINEAR_ACCESS_UNAVAILABLE },
       { status: 503 },
+    );
+  }
+  if (error instanceof StaleRoundError) {
+    return Response.json(
+      { error: new StaleRoundError().message, code: STALE_ROUND },
+      { status: 409 },
     );
   }
   if (error instanceof ZodError) {
