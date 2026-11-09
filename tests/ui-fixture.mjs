@@ -55,7 +55,7 @@ const production = Boolean(process.env.UI_TEST_PRODUCTION);
 const options = {
   cwd: dir,
   stdio: "inherit",
-  env: { PATH: process.env.PATH, HOME: process.env.HOME, NODE_ENV: production ? "production" : "development" },
+  env: { PATH: process.env.PATH, HOME: process.env.HOME, TZ: "UTC", NODE_ENV: production ? "production" : "development" },
 };
 const next = path.join(root, "node_modules/.bin/next");
 if (production) {

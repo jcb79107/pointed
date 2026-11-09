@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { Brand } from "@/components/Brand";
@@ -57,6 +57,10 @@ function suggestedSessionTitle() {
   return `Pointing · ${date}`;
 }
 
+const subscribeToTimeZone = () => () => {};
+const browserTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+const serverTimeZone = () => "UTC";
+
 export function DashboardClient({
   user,
   teams,
@@ -68,6 +72,8 @@ export function DashboardClient({
   const [teamId, setTeamId] = useState(teams[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Hydrate in UTC before switching to the browser's local calendar day.
+  const timeZone = useSyncExternalStore(subscribeToTimeZone, browserTimeZone, serverTimeZone);
 
   async function createSession() {
     setBusy(true);
@@ -258,6 +264,7 @@ export function DashboardClient({
                       {new Intl.DateTimeFormat("en", {
                         month: "short",
                         day: "numeric",
+                        timeZone,
                       }).format(new Date(session.updatedAt))}
                     </div>
                     <span className="session-open">
