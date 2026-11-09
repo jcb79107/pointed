@@ -32,6 +32,17 @@ export default async function Fixture({
     defaults: DEFAULT_TEAM_DEFAULTS,
     queue: [],
   };
+  if (scenario === "cycle-dates") {
+    draft.intake = {
+      cycleOffset: DEFAULT_TEAM_DEFAULTS.cycleOffset, cycleId: "cycle-dates", name: "Boundary cycle",
+      startsAt: "2026-10-14T00:00:00Z", endsAt: "2026-10-28T23:30:00Z",
+    };
+  }
+  if (scenario === "backlog") {
+    draft.intake = {
+      cycleOffset: "backlog", cycleId: null, name: "Backlog / no cycle", startsAt: null, endsAt: null,
+    };
+  }
   const teams = ["team-a", "team-b"].map((id, index) => ({
     id,
     key: "API",

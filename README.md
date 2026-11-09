@@ -177,6 +177,10 @@ checklist. OAuth is optional; copying invitations always remains available.
 Run `npm run test:ui` for the demo's browser and accessibility suite at desktop,
 tablet, and phone sizes. Install Chromium first with `npx playwright install chromium`.
 Use `npm run test:ui:report` to review results, screenshots, and failure traces.
+CI sets `NEXT_PUBLIC_CLARITY_PROJECT_ID=uitest` for both the build and browser tests;
+analytics coverage fails if that CI configuration is missing. Use the same variable
+for local builds and test runs to enable analytics checks. Clarity requests are
+intercepted in those tests; the synthetic ID is not a production setting.
 See [UI test results and coverage](docs/pilot/ui-ux-test-results.md) for scope,
 production-build instructions, and limitations.
 
