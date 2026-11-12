@@ -201,10 +201,3 @@ states, transition owners, recovery rules, concurrency limits, and test entry po
 
 See [UI audit fixes and regression evidence](architecture/ui-audit-fixes.md)
 for the responsive, accessibility, and state-feedback improvements.
-
-## Deployment health checks
-
-The scheduled workflow checks both the public app and the separate private
-`linear-pointing-poker.vercel.app` deployment. This replaces monitoring from the
-retired source repository. The private deployment retains its own database, OAuth
-configuration, and workspace restriction; the health check makes read-only requests.
