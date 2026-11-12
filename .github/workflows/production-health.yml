@@ -10,6 +10,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   health:
+    strategy:
+      fail-fast: false
+      matrix:
+        deployment: [public, private]
+    name: Health (${{ matrix.deployment }})
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
@@ -19,4 +24,4 @@ jobs:
           node-version: 22
       - run: node scripts/check-production.mjs
         env:
-          APP_URL: ${{ vars.APP_URL }}
+          APP_URL: ${{ matrix.deployment == 'private' && 'https://linear-pointing-poker.vercel.app' || vars.APP_URL }}

@@ -19,59 +19,6 @@ Prepare unestimated tickets in a Linear cycle. Load them into Pointed, adjust th
 
 **Public beta:** single-team weekly use is reported; broader pilot verification is still in progress. See the [launch checklist](docs/launch/READINESS.md) for evidence and remaining limits.
 
-## What is implemented
-
-- public Linear OAuth with PKCE, CSRF state validation, and read-first / optional
-  write scopes; public deployments accept any workspace; private deployments can set `ALLOWED_LINEAR_ORG_KEY`
-- encrypted OAuth tokens, server-side refresh, and opaque HTTP-only sessions
-- shared per-team defaults for relative cycle, import order, reveal timing, and
-  facilitator voting; personal appearance settings
-- per-user Slack OAuth channel selection, encrypted webhook fallback, and confirmed
-  session invitations, with copyable invites always available
-- one-click import of all unestimated, unfinished issues from the current cycle,
-  next cycle, two or three cycles ahead, or issues without a cycle
-- drafts pinned to the resolved cycle, including after calendar rollover
-- preview with Linear manual order, priority, oldest-first, drag/keyboard reorder,
-  and removal without changing Linear; imports are limited to 1,000 tickets
-- individual-ticket search during a session, scoped to its original intake source
-- a responsive room with issue Markdown, attachments, embedded Figma designs,
-  sub-issues, queue progress, roster, and phone-friendly voting controls
-- independent participant browsing, mobile revealed votes, and skipped-ticket revisit
-- the selected Linear team’s native scale, zero allowance, extended values,
-  and T-shirt labels inherited by every new session
-- secret replaceable votes, configurable automatic reveal, early reveal,
-  facilitator voting, observers, absences, late joins, revotes, and issue revisit
-- a pre-session waiting room, copyable Slack invite, joined-team count,
-  and keyboard voting/facilitation shortcuts
-- a suggested final estimate based on the arithmetic average, rounded up to the
-  next valid Linear estimate card, with a facilitator override before write-back
-- one secondary issue action: skip and continue to the next ticket
-- total-session and per-ticket timers, pause/resume, and a copyable timed
-  session summary so grooming can stop on time
-- conflict detection before Linear estimate overwrite
-- PostgreSQL-authoritative recovery and Pusher presence notifications that
-  never contain vote values
-- audit events for lifecycle, reveal, roster, revote, and Linear write-back
-
-## Architecture
-
-- Next.js 16 App Router + React 19 + TypeScript
-- Neon Postgres + Drizzle ORM
-- Pusher private presence channels
-- Linear SDK / GraphQL
-- Vercel deployment
-
-Postgres is canonical. Realtime events contain only a room ID-derived channel
-and a change reason; clients refetch an authorization-filtered snapshot. A
-5-second polling fallback keeps the room recoverable during a Pusher outage.
-
-## Small-team pilot
-
-See the [pilot kit](docs/pilot/README.md) for a draft invitation, getting-started
-guide, session checklist, feedback questions, and findings template. The
-[current launch checklist](docs/launch/READINESS.md) separates local verification from
-pending release and real Linear integration checks.
-
 ## Local setup
 
 1. Open `/setup` and use the pre-filled Linear OAuth application form. Keep the
@@ -85,7 +32,7 @@ pending release and real Linear integration checks.
 4. After completing the database isolation setup, install dependencies and start the app:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -101,103 +48,20 @@ existing rooms retain their snapshotted cards.
 
 ## Verification
 
-```bash
+```sh
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
 
-The unit suite covers pointing-scale compatibility, custom agenda sorting,
-finalizable votes, rounded-average recommendations, grooming timers,
-snapshotted voter reveal rules, vote secrecy, permissions, queue progression,
-and OAuth PKCE/state behavior.
+For browser checks, install Chromium with `npx playwright install chromium`, then
+run `npm run test:ui -- --project=desktop --project=phone`. Tests use synthetic
+fixtures; they do not verify live Linear, Slack, or Neon integrations.
 
-The cycle workflow also tests shared team defaults, access boundaries, paginated
-Linear intake, pinned-cycle reloads, and failed/concurrent import recovery using
-disposable PostgreSQL fixtures. Run `npm run test:ui` for isolated browser tests;
-preparation/settings use synthetic fixtures and the demo never writes to Linear.
-For a production-build browser pass, start the build on a separate local port and
-set `UI_TEST_BASE_URL` to that origin. See the
-[cycle workflow verification and rollout notes](docs/pilot/cycle-workflow/RESULTS.md).
+## Documentation
 
-`npm test -- src/lib/slack-persistence.test.ts` runs the actual migration chain,
-Slack storage queries, and encryption in disposable, disk-backed PGlite databases.
-It requires no database URL, Docker, or credentials and deletes its temporary data.
-Slack HTTP responses are mocked. This verifies embedded PostgreSQL behavior;
-it does not verify Neon transport, multi-connection locking, or live Slack delivery.
-
-## Deployment
-
-Import the repository into Vercel, provision Neon, and add the variables from
-`.env.example` to Production and Preview, except `DATABASE_ADMIN_URL`, which stays in your operator environment. Set:
-
-- `APP_URL` to the production origin
-- `LINEAR_REDIRECT_URI` to
-  `https://<production-origin>/api/auth/linear/callback`
-
-Apply migrations with the owner connection and provision restricted runtime/login roles before
-first use, following the [database rollout guide](docs/launch/DATABASE-ISOLATION.md). Never expose `PUSHER_SECRET`, `TOKEN_ENCRYPTION_KEY`, or
-`DATABASE_URL` as `NEXT_PUBLIC_*`.
-
-## License
-
-Licensed under the [MIT License](LICENSE).
-
-## Security model
-
-- All mutating endpoints enforce an authenticated same-origin request.
-- Every room snapshot requires persisted membership.
-- Every participant is checked against the room's Linear team when joining.
-- Protected room snapshots, votes, facilitator actions, and new realtime
-  authorizations also revalidate current Linear team access. Checks are not
-  cached, so polling adds provider requests. A Linear outage temporarily blocks
-  new protected reads/actions with a retryable response; confirmed access denial
-  clears the room UI and disconnects that browser's realtime client. Presence
-  publishes only opaque user IDs, never profile names or avatar URLs. Previously
-  downloaded data cannot be remotely erased, and this is not server-enforced
-  disconnection of already-connected third-party realtime subscribers.
-- The server refetches selected issues; queue metadata is never trusted from the
-  browser.
-- Unrevealed vote values are removed from snapshots and never enter Pusher.
-- The final vote insert and automatic reveal share a row-locked transaction.
-- Estimate finalization row-locks the round, refetches Linear, performs an
-  idempotent update, records the outcome, and advances the queue.
-- Linear Markdown is sanitized. Authenticated Linear images are fetched by a
-  restricted server proxy, so OAuth tokens never reach the browser.
-
-## Slack and settings
-
-See [Slack setup and MVP settings](docs/slack-setup.md) for the one-time OAuth
-app configuration, per-facilitator webhook fallback, migration, and verification
-checklist. OAuth is optional; copying invitations always remains available.
-
-### Automated UI checks
-
-Run `npm run test:ui` for the demo's browser and accessibility suite at desktop,
-tablet, and phone sizes. Install Chromium first with `npx playwright install chromium`.
-Use `npm run test:ui:report` to review results, screenshots, and failure traces.
-CI sets `NEXT_PUBLIC_CLARITY_PROJECT_ID=uitest` for both the build and browser tests;
-analytics coverage fails if that CI configuration is missing. Use the same variable
-for local builds and test runs to enable analytics checks. Clarity requests are
-intercepted in those tests; the synthetic ID is not a production setting.
-See [UI test results and coverage](docs/pilot/ui-ux-test-results.md) for scope,
-production-build instructions, and limitations.
-
-## Contributing and security
-
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [release notes](CHANGELOG.md).
-
-## Error reporting and feedback
-
-The hosted app uses Sentry for privacy-filtered errors and optional user feedback.
-Feedback supports optional screenshot attachments. Recording starts only after the user chooses to record, stays local, and is uploaded only when they submit with “Attach my recording” selected. Canceling discards it. Self-hosted installs can opt in using the
-variables in `.env.example`; see [Sentry setup and data boundaries](docs/launch/SENTRY.md).
-
-## State and transitions
-
-See the [state-machine map](docs/architecture/state-machines.md) for application
-states, transition owners, recovery rules, concurrency limits, and test entry points.
-
-See [UI audit fixes and regression evidence](docs/architecture/ui-audit-fixes.md)
-for the responsive, accessibility, and state-feedback improvements.
+- [Maintainer guide](docs/maintainer-guide.md): architecture, feature inventory, deployment, and detailed verification.
+- [Database isolation](docs/launch/DATABASE-ISOLATION.md): migration owner and restricted runtime roles.
+- [Security](SECURITY.md), [state transitions](docs/architecture/state-machines.md), and [Slack setup](docs/slack-setup.md).
+- [Contributing](CONTRIBUTING.md), [release notes](CHANGELOG.md), and [MIT license](LICENSE).
